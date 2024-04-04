@@ -1,0 +1,81 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer", "RebuildAnalyzer\RebuildAnalyzer.csproj", "{A236C4D0-AC9D-4DB0-8053-EE16842A7482}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{2DCA4324-41DA-4535-8CB6-34DCAF4B69EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Subject", "Subject", "{0817A15D-218F-4640-8BCE-051670234B25}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Test.Subject.Console1", "RebuildAnalyzer.Test.Subject.Console1\RebuildAnalyzer.Test.Subject.Console1.csproj", "{0DE6DBD6-0C4A-4094-97F8-A90F912AA35D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Test.Subject.Console2", "RebuildAnalyzer.Test.Subject.Console2\RebuildAnalyzer.Test.Subject.Console2.csproj", "{212BA98D-C0D0-4D4F-86E1-C958052657B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Test.Subject.Common23", "RebuildAnalyzer.Test.Subject.Common23\RebuildAnalyzer.Test.Subject.Common23.csproj", "{F2A6263B-C3C4-44EA-95FE-E43DE671C3C9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Test.Subject.Console3", "RebuildAnalyzer.Test.Subject.Console3\RebuildAnalyzer.Test.Subject.Console3.csproj", "{4E4EFA6E-A944-4EE4-8D01-794C0ABD2574}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RebuildAnalyzer.Test.Subject.Shared12", "RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.shproj", "{C5412FD4-7D23-4332-8211-CC07AED3532F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Tests", "RebuildAnalyzer.Tests\RebuildAnalyzer.Tests.csproj", "{FBBAFD96-D1D3-4B57-9598-D52B8D5E99D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RebuildAnalyzer.ConsoleApp", "RebuildAnalyzer.ConsoleApp\RebuildAnalyzer.ConsoleApp.csproj", "{353AD830-5145-419E-A271-B535452AE789}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A236C4D0-AC9D-4DB0-8053-EE16842A7482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A236C4D0-AC9D-4DB0-8053-EE16842A7482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A236C4D0-AC9D-4DB0-8053-EE16842A7482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A236C4D0-AC9D-4DB0-8053-EE16842A7482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DE6DBD6-0C4A-4094-97F8-A90F912AA35D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DE6DBD6-0C4A-4094-97F8-A90F912AA35D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DE6DBD6-0C4A-4094-97F8-A90F912AA35D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DE6DBD6-0C4A-4094-97F8-A90F912AA35D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{212BA98D-C0D0-4D4F-86E1-C958052657B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{212BA98D-C0D0-4D4F-86E1-C958052657B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{212BA98D-C0D0-4D4F-86E1-C958052657B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{212BA98D-C0D0-4D4F-86E1-C958052657B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2A6263B-C3C4-44EA-95FE-E43DE671C3C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2A6263B-C3C4-44EA-95FE-E43DE671C3C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2A6263B-C3C4-44EA-95FE-E43DE671C3C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2A6263B-C3C4-44EA-95FE-E43DE671C3C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E4EFA6E-A944-4EE4-8D01-794C0ABD2574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E4EFA6E-A944-4EE4-8D01-794C0ABD2574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E4EFA6E-A944-4EE4-8D01-794C0ABD2574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E4EFA6E-A944-4EE4-8D01-794C0ABD2574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBBAFD96-D1D3-4B57-9598-D52B8D5E99D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBBAFD96-D1D3-4B57-9598-D52B8D5E99D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBBAFD96-D1D3-4B57-9598-D52B8D5E99D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBBAFD96-D1D3-4B57-9598-D52B8D5E99D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{353AD830-5145-419E-A271-B535452AE789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{353AD830-5145-419E-A271-B535452AE789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{353AD830-5145-419E-A271-B535452AE789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{353AD830-5145-419E-A271-B535452AE789}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0817A15D-218F-4640-8BCE-051670234B25} = {2DCA4324-41DA-4535-8CB6-34DCAF4B69EF}
+		{0DE6DBD6-0C4A-4094-97F8-A90F912AA35D} = {0817A15D-218F-4640-8BCE-051670234B25}
+		{212BA98D-C0D0-4D4F-86E1-C958052657B3} = {0817A15D-218F-4640-8BCE-051670234B25}
+		{F2A6263B-C3C4-44EA-95FE-E43DE671C3C9} = {0817A15D-218F-4640-8BCE-051670234B25}
+		{4E4EFA6E-A944-4EE4-8D01-794C0ABD2574} = {0817A15D-218F-4640-8BCE-051670234B25}
+		{C5412FD4-7D23-4332-8211-CC07AED3532F} = {0817A15D-218F-4640-8BCE-051670234B25}
+		{FBBAFD96-D1D3-4B57-9598-D52B8D5E99D2} = {2DCA4324-41DA-4535-8CB6-34DCAF4B69EF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA0784D9-3274-4B73-A282-1F1CBA66525F}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems*{0de6dbd6-0c4a-4094-97f8-a90f912aa35d}*SharedItemsImports = 5
+		RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems*{212ba98d-c0d0-4d4f-86e1-c958052657b3}*SharedItemsImports = 5
+		RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems*{c5412fd4-7d23-4332-8211-cc07aed3532f}*SharedItemsImports = 13
+	EndGlobalSection
+EndGlobal

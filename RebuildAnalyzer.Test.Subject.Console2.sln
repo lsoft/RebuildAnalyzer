@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Test.Subject.Console2", "RebuildAnalyzer.Test.Subject.Console2\RebuildAnalyzer.Test.Subject.Console2.csproj", "{61B1E085-8A1F-48A3-BDE4-14CCB6B66A4E}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RebuildAnalyzer.Test.Subject.Shared12", "RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.shproj", "{C5412FD4-7D23-4332-8211-CC07AED3532F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Test.Subject.Common23", "RebuildAnalyzer.Test.Subject.Common23\RebuildAnalyzer.Test.Subject.Common23.csproj", "{49821D2B-0830-4926-B9F2-0E6508FDA259}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{61B1E085-8A1F-48A3-BDE4-14CCB6B66A4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61B1E085-8A1F-48A3-BDE4-14CCB6B66A4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61B1E085-8A1F-48A3-BDE4-14CCB6B66A4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61B1E085-8A1F-48A3-BDE4-14CCB6B66A4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49821D2B-0830-4926-B9F2-0E6508FDA259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49821D2B-0830-4926-B9F2-0E6508FDA259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49821D2B-0830-4926-B9F2-0E6508FDA259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49821D2B-0830-4926-B9F2-0E6508FDA259}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {667321D6-71EE-42B7-BC8C-48E0F40B604E}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems*{61b1e085-8a1f-48a3-bde4-14ccb6b66a4e}*SharedItemsImports = 5
+		RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems*{c5412fd4-7d23-4332-8211-cc07aed3532f}*SharedItemsImports = 13
+	EndGlobalSection
+EndGlobal

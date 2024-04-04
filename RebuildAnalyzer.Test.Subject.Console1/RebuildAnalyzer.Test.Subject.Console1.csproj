@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net7.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DotNet7File.cs" />
+    <Compile Include="DotNet7File.cs" Condition="$(TargetFramework) == 'net7.0'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="ReleaseFile.cs" />
+    <Compile Include="ReleaseFile.cs" Condition="$(Configuration) == 'Release'" />
+  </ItemGroup>
+
+  <Import Project="..\RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems" Label="Shared" />
+
+</Project>

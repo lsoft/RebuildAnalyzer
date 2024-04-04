@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebuildAnalyzer.Test.Subject.Console1", "RebuildAnalyzer.Test.Subject.Console1\RebuildAnalyzer.Test.Subject.Console1.csproj", "{2D7D6B68-DADE-4FBE-8A42-46860F46C391}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RebuildAnalyzer.Test.Subject.Shared12", "RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.shproj", "{C5412FD4-7D23-4332-8211-CC07AED3532F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2D7D6B68-DADE-4FBE-8A42-46860F46C391}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D7D6B68-DADE-4FBE-8A42-46860F46C391}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D7D6B68-DADE-4FBE-8A42-46860F46C391}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D7D6B68-DADE-4FBE-8A42-46860F46C391}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {667321D6-71EE-42B7-BC8C-48E0F40B604E}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems*{2d7d6b68-dade-4fbe-8a42-46860f46c391}*SharedItemsImports = 5
+		RebuildAnalyzer.Test.Subject.Shared12\RebuildAnalyzer.Test.Subject.Shared12.projitems*{c5412fd4-7d23-4332-8211-cc07aed3532f}*SharedItemsImports = 13
+	EndGlobalSection
+EndGlobal
