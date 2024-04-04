@@ -43,7 +43,24 @@ namespace RebuildAnalyzer.Tests
             Assert.AreEqual(1, ass.Count);
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ass[0].RelativeFilePath);
         }
-        
+
+        [Test]
+        public void ReferencedDll()
+        {
+            var changeset = new Changeset(
+                new[]
+                {
+                    "RebuildAnalyzer.Test.Subject.RandomStuff\\fake_stuff.dll"
+                }.ToHashSet()
+                );
+
+            var ra = new RepositoryAnalyzer();
+            var ass = ra.DetermineAffectedSubjects(changeset);
+
+            Assert.AreEqual(1, ass.Count);
+            Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ass[0].RelativeFilePath);
+        }
+
         public sealed class RepositoryAnalyzer : Analyzer.RepositoryAnalyzer
         {
             public const string SlnRelativeFilePath = "RebuildAnalyzer.Test.Subject.Console3.sln";

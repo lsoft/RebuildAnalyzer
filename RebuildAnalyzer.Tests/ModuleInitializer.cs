@@ -1,4 +1,5 @@
 ﻿using Microsoft.Build.Locator;
+using RebuildAnalyzer.Helper;
 using System.Runtime.CompilerServices;
 
 namespace RebuildAnalyzer.Tests
@@ -9,7 +10,7 @@ namespace RebuildAnalyzer.Tests
         public static void ModuleInitialize()
         {
             MSBuildLocator.RegisterDefaults();
-
+            ParallelOption.MaxDegreeOfParallelism = 1;
         }
     }
 }

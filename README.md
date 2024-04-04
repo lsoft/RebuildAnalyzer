@@ -10,7 +10,7 @@ I guess there are a lot of misses. Issues with repro will be appreciated.
 
 ## How it works
 
-This utility parse your slnf/sln/csproj files to discover all included items and check it against an imcoming changeset to determine if this slnf/sln/csproj has changed.
+This utility parse your `slnf`/`sln`/`csproj` files to discover all included items and check it against an incoming changeset to determine if this slnf/sln/csproj has changed.
 
 Parsing is powered by `Microsoft.Build` nuget.
 

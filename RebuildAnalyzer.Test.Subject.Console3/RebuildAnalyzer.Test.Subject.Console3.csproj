@@ -11,4 +11,10 @@
     <ProjectReference Include="..\RebuildAnalyzer.Test.Subject.Common23\RebuildAnalyzer.Test.Subject.Common23.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="RebuildAnalyzer">
+      <HintPath>..\RebuildAnalyzer.Test.Subject.RandomStuff\fake_stuff.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

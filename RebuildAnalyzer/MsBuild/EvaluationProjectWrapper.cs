@@ -46,28 +46,40 @@ namespace RebuildAnalyzer.MsBuild
                     continue;
                 }
 
-                var ei = item.EvaluatedInclude;
-
-                var rooted = Path.IsPathRooted(ei);
-
-                var eiFullPath = rooted
-                    ? ei
-                    : Path.Combine(csprojFullFolderPath, ei);
-
-                //на случай путей типа ../../somefile.cs
-                eiFullPath = Path.GetFullPath(eiFullPath);
-
-                if (skippedFolders.Any(sf => eiFullPath.StartsWith(sf)))
+                var evaluatedFullPaths = new List<string>();
+                if (item.ItemType == "Reference")
                 {
-                    continue;
+                    foreach (var pm in item.Metadata)
+                    {
+                        if (pm.Name == "HintPath")
+                        {
+                            var ev = pm.EvaluatedValue;
+                            var evFullPath = PathHelper.GetFullPath(csprojFullFolderPath, ev);
+                            evaluatedFullPaths.Add(evFullPath);
+                        }
+                    }
+                }
+                else
+                {
+                    var ei = item.EvaluatedInclude;
+                    var eiFullPath = PathHelper.GetFullPath(csprojFullFolderPath, ei);
+                    evaluatedFullPaths.Add(eiFullPath);
                 }
 
-                if (File.Exists(eiFullPath))
+                foreach (var eiFullPath in evaluatedFullPaths)
                 {
-                    if (eiFullPath.Length > rootFolder.Length)
+                    if (skippedFolders.Any(sf => eiFullPath.StartsWith(sf)))
                     {
-                        var unrooted = eiFullPath.Substring(rootFolder.Length).Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                        filteredItems.Add(unrooted);
+                        continue;
+                    }
+
+                    if (File.Exists(eiFullPath))
+                    {
+                        if (eiFullPath.Length > rootFolder.Length)
+                        {
+                            var unrooted = eiFullPath.Substring(rootFolder.Length).Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                            filteredItems.Add(unrooted);
+                        }
                     }
                 }
             }

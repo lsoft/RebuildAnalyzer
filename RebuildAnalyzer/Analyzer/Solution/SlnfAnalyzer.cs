@@ -73,7 +73,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
             var result = false;
 
             //параллелизуем для ускорения работы
-            Parallel.ForEach(slnf.solution.projects, new ParallelOptions { MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2) }, (relativeProjectFilePath, state) =>
+            Parallel.ForEach(slnf.solution.projects, new ParallelOptions { MaxDegreeOfParallelism = RebuildAnalyzer.Helper.ParallelOption.MaxDegreeOfParallelism }, (relativeProjectFilePath, state) =>
             {
                 if (SkippedProjects.Contains(relativeProjectFilePath))
                 {
