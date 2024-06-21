@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>RebuildAnalyzer</id>
+    <version>0.1.2-alpha</version>
+    <authors>ls</authors>
+    <projectUrl>https://github.com/lsoft/RebuildAnalyzer</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <copyright>(c) ls 2024</copyright>
+    <description>An utility which analyzes your slnf/sln/csproj/shproj against a files changeset to determine what you need to rebuild.</description>
+    <tags>msbuild</tags>
+
+    <dependencies>
+        <dependency id="Microsoft.Build" version="17.9.5" />
+    </dependencies>
+  </metadata>
+
+
+  <files>
+    <file src="RebuildAnalyzer\bin\Release\netstandard2.0\RebuildAnalyzer.dll" target="lib\netstandard2.0" />
+  </files>
+
+</package>

@@ -10,12 +10,12 @@
         /// All paths are relative from repository root without leading (back)slash.
         /// For example: src\MyProject\MyProject.csproj or src/MyProject/MyProject.csproj
         /// </summary>
-        public IReadOnlySet<string> ChangedFiles { get; }
+        public ICollection<string> ChangedFiles { get; }
 
         public bool IsEmpty => ChangedFiles.Count == 0;
 
         public Changeset(
-            IReadOnlySet<string> changedFiles
+            ICollection<string> changedFiles
             )
         {
             if (changedFiles is null)
@@ -55,7 +55,7 @@
             return false;
         }
 
-        public bool ContainsAny(IReadOnlySet<string> projectFiles)
+        public bool ContainsAny(ICollection<string> projectFiles)
         {
             foreach(var projectFile in projectFiles)
             {

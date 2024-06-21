@@ -21,7 +21,7 @@ namespace RebuildAnalyzer.MsBuild
             Project = project;
         }
 
-        public IReadOnlySet<string> ScanForProjectFiles(
+        public ICollection<string> ScanForProjectFiles(
             string rootFolder,
             string csprojFullFolderPath
             )
@@ -88,7 +88,7 @@ namespace RebuildAnalyzer.MsBuild
         }
 
 
-        private IReadOnlySet<string> BuildSkippedFolders(
+        private ICollection<string> BuildSkippedFolders(
             string csprojFullFolderPath
             )
         {
@@ -117,7 +117,7 @@ namespace RebuildAnalyzer.MsBuild
 
                     var propertyValues =
                         evaluatedValue.Contains(";")
-                            ? evaluatedValue.Split(";", StringSplitOptions.RemoveEmptyEntries)
+                            ? evaluatedValue.Split([ ";" ], StringSplitOptions.RemoveEmptyEntries)
                             : new string[] { evaluatedValue }
                         ;
 
@@ -160,7 +160,7 @@ namespace RebuildAnalyzer.MsBuild
             if (sProperty is not null)
             {
                 result.AddRange(
-                    sProperty.EvaluatedValue.Split(";", StringSplitOptions.RemoveEmptyEntries)
+                    sProperty.EvaluatedValue.Split([ ";" ], StringSplitOptions.RemoveEmptyEntries)
                     );
             }
             else
@@ -185,7 +185,7 @@ namespace RebuildAnalyzer.MsBuild
             if (sProperty is not null)
             {
                 result.AddRange(
-                    sProperty.EvaluatedValue.Split(";", StringSplitOptions.RemoveEmptyEntries)
+                    sProperty.EvaluatedValue.Split([ ";" ], StringSplitOptions.RemoveEmptyEntries)
                     );
             }
             else

@@ -4,7 +4,7 @@ An utility which analyzes your slnf/sln/csproj/shproj against a files changeset 
 
 ## Status
 
-Prerealease version.
+Prerelease version.
 
 I guess there are a lot of misses. Issues with repro will be appreciated.
 

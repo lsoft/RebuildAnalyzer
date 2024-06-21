@@ -56,7 +56,7 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             return new EvaluationProjectWrapper(evaluatedProject);
         }
 
-        private IReadOnlySet<string> DetermineProjectFiles()
+        private ICollection<string> DetermineProjectFiles()
         {
             var projectXmlRoot = Microsoft.Build.Construction.ProjectRootElement.Open(
                 CsprojFullFilePath
