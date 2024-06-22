@@ -1,4 +1,5 @@
 ﻿using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation.Context;
 using RebuildAnalyzer.Helper;
 using RebuildAnalyzer.MsBuild;
 
@@ -6,6 +7,8 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
 {
     public sealed class CsprojAnalyzer : IProjectAnalyzer
     {
+        private readonly EvaluationContext _evaluationContext;
+
         public string RootFolder { get; }
         public string CsprojRelativeFilePath { get; }
 
@@ -16,14 +19,27 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
         public string RelativeProjectFilePath => CsprojRelativeFilePath;
 
         public CsprojAnalyzer(
+            Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext,
             string rootFolder,
             string csprojRelativeFilePath
             )
         {
+            if (evaluationContext is null)
+            {
+                throw new ArgumentNullException(nameof(evaluationContext));
+            }
+
+            if (rootFolder is null)
+            {
+                throw new ArgumentNullException(nameof(rootFolder));
+            }
+
             if (csprojRelativeFilePath is null)
             {
                 throw new ArgumentNullException(nameof(csprojRelativeFilePath));
             }
+
+            _evaluationContext = evaluationContext;
             RootFolder = rootFolder;
             CsprojRelativeFilePath = csprojRelativeFilePath;
         }
@@ -50,11 +66,15 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
         {
             var evaluatedProject = Microsoft.Build.Evaluation.Project.FromProjectRootElement(
                 projectXmlRoot,
-                projectOptions ?? new Microsoft.Build.Definition.ProjectOptions { }
+                projectOptions ?? new Microsoft.Build.Definition.ProjectOptions
+                {
+                    EvaluationContext = _evaluationContext
+                }
                 );
 
             return new EvaluationProjectWrapper(evaluatedProject);
         }
+
 
         private ICollection<string> DetermineProjectFiles()
         {
@@ -82,7 +102,8 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                         projectXmlRoot,
                         new Microsoft.Build.Definition.ProjectOptions
                         {
-                            GlobalProperties = gp
+                            GlobalProperties = gp,
+                            EvaluationContext = _evaluationContext
                         }
                         );
 

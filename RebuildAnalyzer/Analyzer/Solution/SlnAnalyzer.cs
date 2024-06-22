@@ -6,6 +6,8 @@ namespace RebuildAnalyzer.Analyzer.Solution
 {
     public sealed class SlnAnalyzer
     {
+        private readonly ProjectAnalyzerFactory _projectAnalyzerFactory;
+
         public IReadOnlyList<string> SkippedProjects { get; }
         public string RootFolder { get; }
         public string SlnRelativeFilePath { get; }
@@ -13,11 +15,17 @@ namespace RebuildAnalyzer.Analyzer.Solution
         public string SlnFullFilePath => Path.Combine(RootFolder, SlnRelativeFilePath);
 
         public SlnAnalyzer(
+            ProjectAnalyzerFactory projectAnalyzerFactory,
             IReadOnlyList<string> skippedProjects,
             string rootFolder,
             string slnRelativeFilePath
             )
         {
+            if (projectAnalyzerFactory is null)
+            {
+                throw new ArgumentNullException(nameof(projectAnalyzerFactory));
+            }
+
             if (skippedProjects is null)
             {
                 throw new ArgumentNullException(nameof(skippedProjects));
@@ -32,6 +40,8 @@ namespace RebuildAnalyzer.Analyzer.Solution
             {
                 throw new ArgumentNullException(nameof(slnRelativeFilePath));
             }
+
+            _projectAnalyzerFactory = projectAnalyzerFactory;
             SkippedProjects = skippedProjects;
             RootFolder = rootFolder;
             SlnRelativeFilePath = slnRelativeFilePath;
@@ -41,7 +51,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
         {
             if (changeset.Contains(SlnRelativeFilePath))
             {
-                //сам slnf изменился
+                //сам sln изменился
                 return true;
             }
 
@@ -51,12 +61,6 @@ namespace RebuildAnalyzer.Analyzer.Solution
             {
                 //sln не найден
                 return false;
-            }
-
-            if (changeset.Contains(SlnRelativeFilePath))
-            {
-                //сам sln изменился
-                return true;
             }
 
             var slnFolder = new FileInfo(SlnFullFilePath).Directory.FullName;
@@ -79,7 +83,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
                     return;
                 }
 
-                var projectAnalyzer = ProjectAnalyzerFactory.TryCreate(
+                var projectAnalyzer = _projectAnalyzerFactory.TryCreate(
                     slnFolder,
                     relativeProjectFilePath
                     );

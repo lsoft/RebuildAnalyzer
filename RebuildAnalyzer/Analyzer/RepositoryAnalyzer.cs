@@ -8,6 +8,8 @@ namespace RebuildAnalyzer.Analyzer
         public const string DirectoryBuildprops = "Directory.Build.props";
         public const string DirectoryPackagesprops = "Directory.Packages.props";
 
+        protected ProjectAnalyzerFactory _projectAnalyzerFactory = new();
+
         protected abstract IReadOnlyList<string> GetSkippedProjects();
 
         protected abstract IReadOnlyList<AnalyzeSubject> ScanForSubjects();
@@ -41,14 +43,24 @@ namespace RebuildAnalyzer.Analyzer
                 switch (subject.Kind)
                 {
                     case AnalyzeSubjectKindEnum.Sln:
-                        var slna = new SlnAnalyzer(skippedProjects, subject.RootFolder, subject.RelativeFilePath);
+                        var slna = new SlnAnalyzer(
+                            _projectAnalyzerFactory,
+                            skippedProjects,
+                            subject.RootFolder,
+                            subject.RelativeFilePath
+                            );
                         if (slna.IsAffected(changeset))
                         {
                             affectedSubjects.Add(subject);
                         }
                         break;
                     case AnalyzeSubjectKindEnum.Slnf:
-                        var slnfa = new SlnfAnalyzer(skippedProjects, subject.RootFolder, subject.RelativeFilePath);
+                        var slnfa = new SlnfAnalyzer(
+                            _projectAnalyzerFactory,
+                            skippedProjects,
+                            subject.RootFolder,
+                            subject.RelativeFilePath
+                            );
                         if (slnfa.IsAffected(changeset))
                         {
                             affectedSubjects.Add(subject);
@@ -57,7 +69,7 @@ namespace RebuildAnalyzer.Analyzer
                     case AnalyzeSubjectKindEnum.Project:
                         if (!skippedProjects.Contains(subject.RelativeFilePath))
                         {
-                            var pa = ProjectAnalyzerFactory.TryCreate(
+                            var pa = _projectAnalyzerFactory.TryCreate(
                                 subject.RootFolder,
                                 subject.RelativeFilePath
                                 );

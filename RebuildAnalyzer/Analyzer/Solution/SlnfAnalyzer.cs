@@ -6,6 +6,8 @@ namespace RebuildAnalyzer.Analyzer.Solution
 {
     public sealed class SlnfAnalyzer
     {
+        private readonly ProjectAnalyzerFactory _projectAnalyzerFactory;
+
         public IReadOnlyList<string> SkippedProjects { get; }
         public string RootFolder { get; }
         public string SlnfRelativeFilePath { get; }
@@ -13,11 +15,17 @@ namespace RebuildAnalyzer.Analyzer.Solution
         public string SlnfFullFilePath => Path.Combine(RootFolder, SlnfRelativeFilePath);
 
         public SlnfAnalyzer(
+            ProjectAnalyzerFactory projectAnalyzerFactory,
             IReadOnlyList<string> skippedProjects,
             string rootFolder,
             string slnfRelativeFilePath
             )
         {
+            if (projectAnalyzerFactory is null)
+            {
+                throw new ArgumentNullException(nameof(projectAnalyzerFactory));
+            }
+
             if (skippedProjects is null)
             {
                 throw new ArgumentNullException(nameof(skippedProjects));
@@ -32,6 +40,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
             {
                 throw new ArgumentNullException(nameof(slnfRelativeFilePath));
             }
+            _projectAnalyzerFactory = projectAnalyzerFactory;
             SkippedProjects = skippedProjects;
             RootFolder = rootFolder;
             SlnfRelativeFilePath = slnfRelativeFilePath;
@@ -81,7 +90,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
                     return;
                 }
 
-                var projectAnalyzer = ProjectAnalyzerFactory.TryCreate(
+                var projectAnalyzer = _projectAnalyzerFactory.TryCreate(
                     slnFolderPath, //relativeProjectFilePath relative against SLN file, not a slnF file!
                     relativeProjectFilePath
                     );
