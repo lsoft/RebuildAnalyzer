@@ -1,4 +1,6 @@
-﻿namespace RebuildAnalyzer
+﻿using System.Runtime.InteropServices;
+
+namespace RebuildAnalyzer
 {
     /// <summary>
     /// Change set of files (from a commit(s) or PR).
@@ -13,6 +15,27 @@
         public ICollection<string> ChangedFiles { get; }
 
         public bool IsEmpty => ChangedFiles.Count == 0;
+
+        /// <summary>
+        /// Builds changeset with filepaths in linux format.
+        /// If current OS is Windows, convertation / -> \ will be performed.
+        /// If current OS is NOT Windows, no convertation occurs.
+        /// </summary>
+        public static Changeset BuildChangesetFromLinuxPaths(
+            ICollection<string> changedFiles
+            )
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var fixedPaths = changedFiles
+                    .Select(r => r.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
+                    .ToList();
+
+                return new Changeset(fixedPaths);
+            }
+
+            return new Changeset(changedFiles);
+        }
 
         public Changeset(
             ICollection<string> changedFiles
