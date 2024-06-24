@@ -1,12 +1,12 @@
 ﻿using System.Text.Json;
-using RebuildAnalyzer.Analyzer.Solution.Project;
+using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using RebuildAnalyzer.FileStructure;
 
 namespace RebuildAnalyzer.Analyzer.Solution
 {
     public sealed class SlnfAnalyzer
     {
-        private readonly ProjectAnalyzerFactory _projectAnalyzerFactory;
+        private readonly IProjectAnalyzerFactory _projectAnalyzerFactory;
 
         public IReadOnlyList<string> SkippedProjects { get; }
         public string RootFolder { get; }
@@ -15,7 +15,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
         public string SlnfFullFilePath => Path.Combine(RootFolder, SlnfRelativeFilePath);
 
         public SlnfAnalyzer(
-            ProjectAnalyzerFactory projectAnalyzerFactory,
+            IProjectAnalyzerFactory projectAnalyzerFactory,
             IReadOnlyList<string> skippedProjects,
             string rootFolder,
             string slnfRelativeFilePath

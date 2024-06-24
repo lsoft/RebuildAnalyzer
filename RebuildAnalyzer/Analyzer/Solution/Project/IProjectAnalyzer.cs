@@ -2,7 +2,10 @@
 {
     public interface IProjectAnalyzer
     {
-        string RelativeProjectFilePath { get; }
+        string ProjectRelativeFilePath { get; }
+
+        
+        void Prepare();
 
         bool IsAffected(Changeset changeset);
     }

@@ -1,12 +1,13 @@
 ﻿using Microsoft.Build.Evaluation.Context;
+using System.Runtime.CompilerServices;
 
-namespace RebuildAnalyzer.Analyzer.Solution.Project
+namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
 {
-    public class ProjectAnalyzerFactory
+    public sealed class ProjectAnalyzerFactory : IProjectAnalyzerFactory
     {
-        private Microsoft.Build.Evaluation.Context.EvaluationContext _evaluationContext =
-            Microsoft.Build.Evaluation.Context.EvaluationContext.Create(
-                Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy.Shared
+        private EvaluationContext _evaluationContext =
+            EvaluationContext.Create(
+                EvaluationContext.SharingPolicy.Shared
                 );
 
         public IProjectAnalyzer? TryCreate(
@@ -19,7 +20,9 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                 projectRelativeFilePath
                 );
 
-            return new TelemetryProjectAnalyzer(realProjectAnalyzer);
+            realProjectAnalyzer.Prepare();
+
+            return realProjectAnalyzer;
         }
 
         private IProjectAnalyzer BuildRealAnalyzer(

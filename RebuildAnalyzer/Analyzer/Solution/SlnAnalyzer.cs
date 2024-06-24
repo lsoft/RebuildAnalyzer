@@ -1,12 +1,12 @@
 ﻿using Microsoft.Build.Construction;
-using RebuildAnalyzer.Analyzer.Solution.Project;
+using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using RebuildAnalyzer.Helper;
 
 namespace RebuildAnalyzer.Analyzer.Solution
 {
     public sealed class SlnAnalyzer
     {
-        private readonly ProjectAnalyzerFactory _projectAnalyzerFactory;
+        private readonly IProjectAnalyzerFactory _projectAnalyzerFactory;
 
         public IReadOnlyList<string> SkippedProjects { get; }
         public string RootFolder { get; }
@@ -15,7 +15,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
         public string SlnFullFilePath => Path.Combine(RootFolder, SlnRelativeFilePath);
 
         public SlnAnalyzer(
-            ProjectAnalyzerFactory projectAnalyzerFactory,
+            IProjectAnalyzerFactory projectAnalyzerFactory,
             IReadOnlyList<string> skippedProjects,
             string rootFolder,
             string slnRelativeFilePath

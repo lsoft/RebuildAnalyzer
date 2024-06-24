@@ -12,6 +12,8 @@ namespace RebuildAnalyzer.ConsoleApp
 
             var changeset = TestRepositoryAnalyzer.TestChangeset1;
 
+            RebuildAnalyzer.Helper.ParallelOption.MaxDegreeOfParallelism = 1;
+
             var sw = Stopwatch.StartNew();
 
             var ra = new TestRepositoryAnalyzer();
@@ -47,6 +49,31 @@ namespace RebuildAnalyzer.ConsoleApp
             {
                 return new List<AnalyzeSubject>
                 {
+                    new AnalyzeSubject(
+                        Path.GetFullPath(@"..\\..\\..\\..\\"),
+                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
+                        AnalyzeSubjectKindEnum.Sln
+                        ),
+                    new AnalyzeSubject(
+                        Path.GetFullPath(@"..\\..\\..\\..\\"),
+                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
+                        AnalyzeSubjectKindEnum.Sln
+                        ),
+                    new AnalyzeSubject(
+                        Path.GetFullPath(@"..\\..\\..\\..\\"),
+                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
+                        AnalyzeSubjectKindEnum.Sln
+                        ),
+                    new AnalyzeSubject(
+                        Path.GetFullPath(@"..\\..\\..\\..\\"),
+                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
+                        AnalyzeSubjectKindEnum.Sln
+                        ),
+                    new AnalyzeSubject(
+                        Path.GetFullPath(@"..\\..\\..\\..\\"),
+                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
+                        AnalyzeSubjectKindEnum.Sln
+                        ),
                     new AnalyzeSubject(
                         Path.GetFullPath(@"..\\..\\..\\..\\"),
                         @"RebuildAnalyzer.Test.Subject.Console1.sln",

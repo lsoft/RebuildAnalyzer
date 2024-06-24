@@ -1,5 +1,5 @@
 ﻿using RebuildAnalyzer.Analyzer.Solution;
-using RebuildAnalyzer.Analyzer.Solution.Project;
+using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 
 namespace RebuildAnalyzer.Analyzer
 {
@@ -7,8 +7,6 @@ namespace RebuildAnalyzer.Analyzer
     {
         public const string DirectoryBuildprops = "Directory.Build.props";
         public const string DirectoryPackagesprops = "Directory.Packages.props";
-
-        protected ProjectAnalyzerFactory _projectAnalyzerFactory = new();
 
         protected abstract IReadOnlyList<string> GetSkippedProjects();
 
@@ -20,6 +18,12 @@ namespace RebuildAnalyzer.Analyzer
             {
                 return new List<AnalyzeSubject>();
             }
+
+            var projectAnalyzerFactory =
+                new CachedProjectAnalyzerFactory(
+                    new ProjectAnalyzerFactory(
+                        )
+                    );
 
             var subjects = ScanForSubjects();
 
@@ -44,7 +48,7 @@ namespace RebuildAnalyzer.Analyzer
                 {
                     case AnalyzeSubjectKindEnum.Sln:
                         var slna = new SlnAnalyzer(
-                            _projectAnalyzerFactory,
+                            projectAnalyzerFactory,
                             skippedProjects,
                             subject.RootFolder,
                             subject.RelativeFilePath
@@ -56,7 +60,7 @@ namespace RebuildAnalyzer.Analyzer
                         break;
                     case AnalyzeSubjectKindEnum.Slnf:
                         var slnfa = new SlnfAnalyzer(
-                            _projectAnalyzerFactory,
+                            projectAnalyzerFactory,
                             skippedProjects,
                             subject.RootFolder,
                             subject.RelativeFilePath
@@ -69,7 +73,7 @@ namespace RebuildAnalyzer.Analyzer
                     case AnalyzeSubjectKindEnum.Project:
                         if (!skippedProjects.Contains(subject.RelativeFilePath))
                         {
-                            var pa = _projectAnalyzerFactory.TryCreate(
+                            var pa = projectAnalyzerFactory.TryCreate(
                                 subject.RootFolder,
                                 subject.RelativeFilePath
                                 );
@@ -83,6 +87,8 @@ namespace RebuildAnalyzer.Analyzer
                         throw new InvalidOperationException(subject.Kind.ToString());
                 }
             }
+
+            Console.WriteLine($"Cached analyzer factory stat: cached {projectAnalyzerFactory.CachedAnalyzerCreateInvocation} out of total {projectAnalyzerFactory.TotalAnalyzerCreateInvocation}, non-cached building takes {projectAnalyzerFactory.NonCachedAnalyzerCreateTimeSpent.TotalSeconds} seconds.");
 
             return affectedSubjects;
         }

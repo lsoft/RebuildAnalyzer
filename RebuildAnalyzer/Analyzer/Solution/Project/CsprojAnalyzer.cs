@@ -9,14 +9,18 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
     {
         private readonly EvaluationContext _evaluationContext;
 
+        private HashSet<string>? _projectFiles;
+
         public string RootFolder { get; }
+
         public string CsprojRelativeFilePath { get; }
 
         public string CsprojFullFilePath => Path.Combine(RootFolder, CsprojRelativeFilePath);
 
         public string CsprojFullFolderPath => new FileInfo(CsprojFullFilePath).Directory.FullName;
 
-        public string RelativeProjectFilePath => CsprojRelativeFilePath;
+        public string ProjectRelativeFilePath => CsprojRelativeFilePath;
+
 
         public CsprojAnalyzer(
             Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext,
@@ -44,17 +48,26 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             CsprojRelativeFilePath = csprojRelativeFilePath;
         }
 
+        public void Prepare()
+        {
+            _projectFiles = DetermineProjectFiles();
+        }
+
+
         public bool IsAffected(Changeset changeset)
         {
+            if (_projectFiles is null)
+            {
+                throw new InvalidOperationException("Csproj analyzer is not prepared.");
+            }
+
             if (changeset.Contains(CsprojRelativeFilePath))
             {
                 //сам csproj изменился
                 return true;
             }
 
-            var projectFiles = DetermineProjectFiles();
-
-            var result = changeset.ContainsAny(projectFiles);
+            var result = changeset.ContainsAny(_projectFiles);
 
             return result;
         }
@@ -76,7 +89,7 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
         }
 
 
-        private ICollection<string> DetermineProjectFiles()
+        private HashSet<string> DetermineProjectFiles()
         {
             var projectXmlRoot = Microsoft.Build.Construction.ProjectRootElement.Open(
                 CsprojFullFilePath

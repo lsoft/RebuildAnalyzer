@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace RebuildAnalyzer
 {
@@ -12,9 +13,9 @@ namespace RebuildAnalyzer
         /// All paths are relative from repository root without leading (back)slash.
         /// For example: src\MyProject\MyProject.csproj or src/MyProject/MyProject.csproj
         /// </summary>
-        public ICollection<string> ChangedFiles { get; }
+        private HashSet<string> _changedFiles;
 
-        public bool IsEmpty => ChangedFiles.Count == 0;
+        public bool IsEmpty => _changedFiles.Count == 0;
 
         /// <summary>
         /// Builds changeset with filepaths in linux format.
@@ -22,14 +23,14 @@ namespace RebuildAnalyzer
         /// If current OS is NOT Windows, no convertation occurs.
         /// </summary>
         public static Changeset BuildChangesetFromLinuxPaths(
-            ICollection<string> changedFiles
+            IEnumerable<string> changedFiles
             )
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var fixedPaths = changedFiles
                     .Select(r => r.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
-                    .ToList();
+                    ;
 
                 return new Changeset(fixedPaths);
             }
@@ -38,7 +39,7 @@ namespace RebuildAnalyzer
         }
 
         public Changeset(
-            ICollection<string> changedFiles
+            IEnumerable<string> changedFiles
             )
         {
             if (changedFiles is null)
@@ -46,17 +47,13 @@ namespace RebuildAnalyzer
                 throw new ArgumentNullException(nameof(changedFiles));
             }
 
-            ChangedFiles = changedFiles;
+            _changedFiles = new (changedFiles); //uniqueness is essential
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(string filePath)
         {
-            if (filePath is null)
-            {
-                throw new ArgumentNullException(nameof(filePath));
-            }
-
-            return ChangedFiles.Contains(filePath);
+            return _changedFiles.Contains(filePath);
         }
 
 
@@ -67,7 +64,7 @@ namespace RebuildAnalyzer
                 throw new ArgumentNullException(nameof(filePath));
             }
 
-            foreach(var changedFile in ChangedFiles)
+            foreach(var changedFile in _changedFiles)
             {
                 if(changedFile.EndsWith(filePath))
                 {
@@ -78,7 +75,9 @@ namespace RebuildAnalyzer
             return false;
         }
 
-        public bool ContainsAny(ICollection<string> projectFiles)
+        public bool ContainsAny(
+            IEnumerable<string> projectFiles
+            )
         {
             foreach(var projectFile in projectFiles)
             {

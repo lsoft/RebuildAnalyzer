@@ -11,7 +11,7 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
 
         public string ShprojFullFilePath => Path.Combine(RootFolder, ShprojRelativeFilePath);
 
-        public string RelativeProjectFilePath => ShprojRelativeFilePath;
+        public string ProjectRelativeFilePath => ShprojRelativeFilePath;
 
         public ShprojAnalyzer(
             string rootFolder,
@@ -25,6 +25,11 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
 
             RootFolder = rootFolder;
             ShprojRelativeFilePath = shprojRelativeFilePath;
+        }
+
+        public void Prepare()
+        {
+            //nothing to do
         }
 
         public bool IsAffected(Changeset changeset)
