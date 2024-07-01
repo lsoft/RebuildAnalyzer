@@ -19,8 +19,8 @@ namespace RebuildAnalyzer
 
         /// <summary>
         /// Builds changeset with filepaths in linux format.
-        /// If current OS is Windows, convertation / -> \ will be performed.
-        /// If current OS is NOT Windows, no convertation occurs.
+        /// If current OS is Windows, conversion / -> \ will be performed.
+        /// If current OS is NOT Windows, no conversion occurs.
         /// </summary>
         public static Changeset BuildChangesetFromLinuxPaths(
             IEnumerable<string> changedFiles
@@ -29,7 +29,7 @@ namespace RebuildAnalyzer
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var fixedPaths = changedFiles
-                    .Select(r => r.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
+                    .Select(r => r.Replace("/", "\\"))
                     ;
 
                 return new Changeset(fixedPaths);

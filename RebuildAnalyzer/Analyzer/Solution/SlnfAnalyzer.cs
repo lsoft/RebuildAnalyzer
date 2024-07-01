@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.InteropServices;
+using System.Text.Json;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using RebuildAnalyzer.FileStructure;
 
@@ -54,8 +55,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
                 return true;
             }
 
-            var slnf = JsonSerializer.Deserialize<SlnfJson>(File.ReadAllText(SlnfFullFilePath));
-
+            var slnf = CreateSlnf();
             if (slnf is null)
             {
                 //slnf не найден
@@ -112,6 +112,21 @@ namespace RebuildAnalyzer.Analyzer.Solution
             });
 
             return result;
+        }
+
+
+        private SlnfJson? CreateSlnf()
+        {
+            var slnf = JsonSerializer.Deserialize<SlnfJson>(File.ReadAllText(SlnfFullFilePath));
+            if (slnf is null)
+            {
+                //slnf не найден
+                return null;
+            }
+
+            slnf.UpdateSlashesInPaths();
+
+            return slnf;
         }
 
     }
