@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Construction;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using RebuildAnalyzer.Helper;
+using System.Collections.Concurrent;
 
 namespace RebuildAnalyzer.Analyzer.Solution
 {
@@ -47,11 +48,15 @@ namespace RebuildAnalyzer.Analyzer.Solution
             SlnRelativeFilePath = slnRelativeFilePath;
         }
 
-        public bool IsAffected(Changeset changeset)
+        public bool IsAffected(
+            Changeset changeset,
+            out List<AffectedSubjectPart>? affectedParts
+            )
         {
             if (changeset.Contains(SlnRelativeFilePath))
             {
                 //сам sln изменился
+                affectedParts = new List<AffectedSubjectPart>();
                 return true;
             }
 
@@ -60,14 +65,14 @@ namespace RebuildAnalyzer.Analyzer.Solution
             if (sln is null)
             {
                 //sln не найден
+                affectedParts = null;
                 return false;
             }
 
             var slnFolder = new FileInfo(SlnFullFilePath).Directory.FullName;
 
-            var result = false;
-
             //параллелизуем для ускорения работы
+            var inProcessAffectedParts = new ConcurrentBag<AffectedSubjectPart>();
             Parallel.ForEach(sln.ProjectsInOrder, new ParallelOptions { MaxDegreeOfParallelism = RebuildAnalyzer.Helper.ParallelOption.MaxDegreeOfParallelism }, (projectInSolution, state) =>
             {
                 if(projectInSolution.ProjectType.In(SolutionProjectType.SolutionFolder))
@@ -90,21 +95,30 @@ namespace RebuildAnalyzer.Analyzer.Solution
                 if (projectAnalyzer is null)
                 {
                     //неизвестный проект, поэтому, на всякий случай, сообщаем, что sln изменился
-                    result = true;
-                    state.Break();
+                    inProcessAffectedParts.Add(
+                        new AffectedSubjectPart(
+                            AnalyzeSubjectKindEnum.Project,
+                            relativeProjectFilePath
+                            )
+                        );
                     return;
                 }
 
                 if (projectAnalyzer.IsAffected(changeset))
                 {
                     //проект изменился, дальше крутить смысла нет
-                    result = true;
-                    state.Break();
+                    inProcessAffectedParts.Add(
+                        new AffectedSubjectPart(
+                            AnalyzeSubjectKindEnum.Project,
+                            relativeProjectFilePath
+                            )
+                        );
                     return;
                 }
             });
 
-            return result;
+            affectedParts = inProcessAffectedParts.ToList();
+            return affectedParts.Count > 0;
         }
 
     }

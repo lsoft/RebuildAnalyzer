@@ -16,8 +16,9 @@ namespace RebuildAnalyzer.ConsoleApp
 
             var sw = Stopwatch.StartNew();
 
-            var ra = new TestRepositoryAnalyzer();
-            var affs = ra.DetermineAffectedSubjects(changeset);
+            var tra = new TestRepositoryAnalyzer();
+            var ar = tra.DetermineAffectedSubjects(changeset);
+            var affs = ar.Results.Select(a => a.Subject).ToList();
             Console.WriteLine("Changed: " + string.Join(",", affs.Select(a => a.RelativeFilePath)));
 
             Console.WriteLine("Taken: " + sw.Elapsed);
@@ -45,7 +46,7 @@ namespace RebuildAnalyzer.ConsoleApp
                 };
             }
 
-            protected override IReadOnlyList<AnalyzeSubject> ScanForSubjects()
+            protected override List<AnalyzeSubject> ScanForSubjects()
             {
                 return new List<AnalyzeSubject>
                 {

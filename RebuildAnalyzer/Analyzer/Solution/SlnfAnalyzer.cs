@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using RebuildAnalyzer.FileStructure;
@@ -47,11 +48,15 @@ namespace RebuildAnalyzer.Analyzer.Solution
             SlnfRelativeFilePath = slnfRelativeFilePath;
         }
 
-        public bool IsAffected(Changeset changeset)
+        public bool IsAffected(
+            Changeset changeset,
+            out List<AffectedSubjectPart>? affectedParts
+            )
         {
             if (changeset.Contains(SlnfRelativeFilePath))
             {
                 //сам slnf изменился
+                affectedParts = new List<AffectedSubjectPart>();
                 return true;
             }
 
@@ -59,6 +64,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
             if (slnf is null)
             {
                 //slnf не найден
+                affectedParts = null;
                 return false;
             }
 
@@ -68,6 +74,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
             if (changeset.Contains(slnf.solution.path))
             {
                 //сам sln изменился
+                affectedParts = new List<AffectedSubjectPart>();
                 return true;
             }
 
@@ -79,9 +86,8 @@ namespace RebuildAnalyzer.Analyzer.Solution
             slnFilePath = Path.GetFullPath(slnFilePath);
             var slnFolderPath = new FileInfo(slnFilePath).Directory.FullName;
 
-            var result = false;
-
             //параллелизуем для ускорения работы
+            var inProcessAffectedParts = new ConcurrentBag<AffectedSubjectPart>();
             Parallel.ForEach(slnf.solution.projects, new ParallelOptions { MaxDegreeOfParallelism = RebuildAnalyzer.Helper.ParallelOption.MaxDegreeOfParallelism }, (relativeProjectFilePath, state) =>
             {
                 if (SkippedProjects.Contains(relativeProjectFilePath))
@@ -97,21 +103,30 @@ namespace RebuildAnalyzer.Analyzer.Solution
                 if (projectAnalyzer is null)
                 {
                     //неизвестный проект, поэтому, на всякий случай, сообщаем, что slnf изменился
-                    result = true;
-                    state.Break();
+                    inProcessAffectedParts.Add(
+                        new AffectedSubjectPart(
+                            AnalyzeSubjectKindEnum.Project,
+                            relativeProjectFilePath
+                            )
+                        );
                     return;
                 }
 
                 if (projectAnalyzer.IsAffected(changeset))
                 {
                     //проект изменился, дальше крутить смысла нет
-                    result = true;
-                    state.Break();
+                    inProcessAffectedParts.Add(
+                        new AffectedSubjectPart(
+                            AnalyzeSubjectKindEnum.Project,
+                            relativeProjectFilePath
+                            )
+                        );
                     return;
                 }
             });
 
-            return result;
+            affectedParts = inProcessAffectedParts.ToList();
+            return affectedParts.Count > 0;
         }
 
 

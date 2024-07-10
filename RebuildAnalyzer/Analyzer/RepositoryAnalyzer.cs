@@ -3,20 +3,123 @@ using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 
 namespace RebuildAnalyzer.Analyzer
 {
+    /// <summary>
+    /// Results of repository analyze.
+    /// </summary>
+    public sealed class AnalyzeResult
+    {
+        private readonly List<SubjectAnalyzeResult> _results = new();
+
+        public IReadOnlyList<SubjectAnalyzeResult> Results => _results;
+
+        internal AnalyzeResult()
+        {
+        }
+
+        internal AnalyzeResult(
+            List<SubjectAnalyzeResult> results
+            )
+        {
+            if (results is null)
+            {
+                throw new ArgumentNullException(nameof(results));
+            }
+
+            _results = results;
+        }
+    }
+
+
+    /// <summary>
+    /// Results of subject analyze.
+    /// </summary>
+    public sealed class SubjectAnalyzeResult
+    {
+        public AnalyzeSubject Subject
+        {
+            get;
+        }
+        public IReadOnlyList<AffectedSubjectPart> AffectedParts
+        {
+            get;
+        }
+
+        internal SubjectAnalyzeResult(
+            AnalyzeSubject subject
+            ) : this(subject, new List<AffectedSubjectPart>())
+        {
+        }
+
+        internal SubjectAnalyzeResult(
+            AnalyzeSubject subject,
+            AffectedSubjectPart affectedPart
+            ) : this(subject, new List<AffectedSubjectPart> { affectedPart })
+        {
+        }
+
+        internal SubjectAnalyzeResult(
+            AnalyzeSubject subject,
+            IReadOnlyList<AffectedSubjectPart>? affectedParts
+            )
+        {
+            if (subject is null)
+            {
+                throw new ArgumentNullException(nameof(subject));
+            }
+
+            if (affectedParts is null)
+            {
+                throw new ArgumentNullException(nameof(affectedParts));
+            }
+
+            Subject = subject;
+            AffectedParts = affectedParts ?? new List<AffectedSubjectPart>();
+        }
+    }
+
+    /// <summary>
+    /// Affected subject part (usually, a project, csproj or something).
+    /// </summary>
+    public sealed class AffectedSubjectPart
+    {
+        public AnalyzeSubjectKindEnum Kind
+        {
+            get;
+        }
+        public string RelativeProjectFilePath
+        {
+            get;
+        }
+
+        internal AffectedSubjectPart(
+            AnalyzeSubjectKindEnum kind,
+            string relativeProjectFilePath
+            )
+        {
+            if (relativeProjectFilePath is null)
+            {
+                throw new ArgumentNullException(nameof(relativeProjectFilePath));
+            }
+
+            Kind = kind;
+            RelativeProjectFilePath = relativeProjectFilePath;
+        }
+    }
+
     public abstract class RepositoryAnalyzer
     {
-        public const string DirectoryBuildprops = "Directory.Build.props";
-        public const string DirectoryPackagesprops = "Directory.Packages.props";
+        public const string DirectoryBuildProps = "Directory.Build.props";
+        public const string DirectoryPackagesProps = "Directory.Packages.props";
 
         protected abstract IReadOnlyList<string> GetSkippedProjects();
 
-        protected abstract IReadOnlyList<AnalyzeSubject> ScanForSubjects();
+        protected abstract List<AnalyzeSubject> ScanForSubjects();
 
-        public IReadOnlyList<AnalyzeSubject> DetermineAffectedSubjects(Changeset changeset)
+        public AnalyzeResult DetermineAffectedSubjects(Changeset changeset)
         {
             if(changeset.IsEmpty)
             {
-                return new List<AnalyzeSubject>();
+                return new AnalyzeResult();
             }
 
             var projectAnalyzerFactory =
@@ -27,19 +130,23 @@ namespace RebuildAnalyzer.Analyzer
 
             var subjects = ScanForSubjects();
 
-            if (changeset.ContainsAtAnyLevel(DirectoryBuildprops))
+            if (changeset.ContainsAtAnyLevel(DirectoryBuildProps))
             {
                 //все субъекты затронуты
-                return subjects;
+                return new(
+                    subjects.ConvertAll(a => new SubjectAnalyzeResult(a))
+                    );
             }
-            if (changeset.ContainsAtAnyLevel(DirectoryPackagesprops))
+            if (changeset.ContainsAtAnyLevel(DirectoryPackagesProps))
             {
                 //все субъекты затронуты
-                return subjects;
+                return new(
+                    subjects.ConvertAll(a => new SubjectAnalyzeResult(a))
+                    );
             }
             //TODO: Добавить еще файлы, которые влияют на множество sln, slnf, csproj
 
-            var affectedSubjects = new List<AnalyzeSubject>();
+            var subjectAnalyzeResults = new List<SubjectAnalyzeResult>();
 
             var skippedProjects = GetSkippedProjects();
             foreach (var subject in subjects)
@@ -47,39 +154,66 @@ namespace RebuildAnalyzer.Analyzer
                 switch (subject.Kind)
                 {
                     case AnalyzeSubjectKindEnum.Sln:
-                        var slna = new SlnAnalyzer(
-                            projectAnalyzerFactory,
-                            skippedProjects,
-                            subject.RootFolder,
-                            subject.RelativeFilePath
-                            );
-                        if (slna.IsAffected(changeset))
                         {
-                            affectedSubjects.Add(subject);
-                        }
-                        break;
-                    case AnalyzeSubjectKindEnum.Slnf:
-                        var slnfa = new SlnfAnalyzer(
-                            projectAnalyzerFactory,
-                            skippedProjects,
-                            subject.RootFolder,
-                            subject.RelativeFilePath
-                            );
-                        if (slnfa.IsAffected(changeset))
-                        {
-                            affectedSubjects.Add(subject);
-                        }
-                        break;
-                    case AnalyzeSubjectKindEnum.Project:
-                        if (!skippedProjects.Contains(subject.RelativeFilePath))
-                        {
-                            var pa = projectAnalyzerFactory.TryCreate(
+                            var slna = new SlnAnalyzer(
+                                projectAnalyzerFactory,
+                                skippedProjects,
                                 subject.RootFolder,
                                 subject.RelativeFilePath
                                 );
-                            if (pa != null && pa.IsAffected(changeset))
+                            if (slna.IsAffected(changeset, out var affectedParts))
                             {
-                                affectedSubjects.Add(subject);
+                                subjectAnalyzeResults.Add(
+                                    new SubjectAnalyzeResult(
+                                        subject,
+                                        affectedParts
+                                        )
+                                    );
+                            }
+                        }
+                        break;
+                    case AnalyzeSubjectKindEnum.Slnf:
+                        {
+                            var slnfa = new SlnfAnalyzer(
+                                projectAnalyzerFactory,
+                                skippedProjects,
+                                subject.RootFolder,
+                                subject.RelativeFilePath
+                                );
+                            if (slnfa.IsAffected(changeset, out var affectedParts))
+                            {
+                                subjectAnalyzeResults.Add(
+                                    new SubjectAnalyzeResult(
+                                        subject,
+                                        affectedParts
+                                        )
+                                    );
+                            }
+                        }
+                        break;
+                    case AnalyzeSubjectKindEnum.Project:
+                        {
+                            if (!skippedProjects.Contains(subject.RelativeFilePath))
+                            {
+                                var pa = projectAnalyzerFactory.TryCreate(
+                                    subject.RootFolder,
+                                    subject.RelativeFilePath
+                                    );
+                                if (pa != null)
+                                {
+                                    if (pa.IsAffected(changeset))
+                                    {
+                                        subjectAnalyzeResults.Add(
+                                            new SubjectAnalyzeResult(
+                                                subject,
+                                                new AffectedSubjectPart(
+                                                    AnalyzeSubjectKindEnum.Project,
+                                                    subject.RelativeFilePath
+                                                    )
+                                                )
+                                            );
+                                    }
+                                }
                             }
                         }
                         break;
@@ -90,7 +224,9 @@ namespace RebuildAnalyzer.Analyzer
 
             Console.WriteLine($"Cached analyzer factory stat: cached {projectAnalyzerFactory.CachedAnalyzerCreateInvocation} out of total {projectAnalyzerFactory.TotalAnalyzerCreateInvocation}, non-cached building takes {projectAnalyzerFactory.NonCachedAnalyzerCreateTimeSpent.TotalSeconds} seconds.");
 
-            return affectedSubjects;
+            return new(
+                subjectAnalyzeResults
+                );
         }
     }
 }
