@@ -53,29 +53,12 @@ namespace RebuildAnalyzer.Analyzer.Solution
             out List<AffectedSubjectPart>? affectedParts
             )
         {
-            if (changeset.Contains(SlnfRelativeFilePath))
-            {
-                //сам slnf изменился
-                affectedParts = new List<AffectedSubjectPart>();
-                return true;
-            }
-
             var slnf = CreateSlnf();
             if (slnf is null)
             {
                 //slnf не найден
                 affectedParts = null;
                 return false;
-            }
-
-            //TODO: здесь может быть ошибка с путями, если sln или slnf лежат не в корне репозитория
-            //вероятно, путь к sln внутри slnf идет относительно САМОГО ФАЙЛА slnf, а не корня репозитория
-            //а в ченжсете пути хранятся относительно корня репозитория
-            if (changeset.Contains(slnf.solution.path))
-            {
-                //сам sln изменился
-                affectedParts = new List<AffectedSubjectPart>();
-                return true;
             }
 
             var slnfFolder = new FileInfo(SlnfFullFilePath).Directory.FullName;
@@ -126,6 +109,31 @@ namespace RebuildAnalyzer.Analyzer.Solution
             });
 
             affectedParts = inProcessAffectedParts.ToList();
+            
+            //after we determined affected parts, and REGARDLESS of these affected parts
+            //we need to check if slnf or sln files has changed and return true if so
+            //we cannot do this before parts processing because we need to return actual
+            //affected parts even if slnf/sln has changed
+            //(merge request can change cs files and slnf/sln files and we must return
+            //affected parts regardless of slnf/sln status)
+
+            //check if slnf has changed
+            if (changeset.Contains(SlnfRelativeFilePath))
+            {
+                //сам slnf изменился
+                return true;
+            }
+
+            //check if sln (not slnf) has changed
+            //TODO: здесь может быть ошибка с путями, если sln или slnf лежат не в корне репозитория
+            //вероятно, путь к sln внутри slnf идет относительно САМОГО ФАЙЛА slnf, а не корня репозитория
+            //а в ченжсете пути хранятся относительно корня репозитория
+            if (changeset.Contains(slnf.solution.path))
+            {
+                //сам sln изменился
+                return true;
+            }
+
             return affectedParts.Count > 0;
         }
 

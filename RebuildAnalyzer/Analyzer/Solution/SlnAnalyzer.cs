@@ -53,15 +53,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
             out List<AffectedSubjectPart>? affectedParts
             )
         {
-            if (changeset.Contains(SlnRelativeFilePath))
-            {
-                //сам sln изменился
-                affectedParts = new List<AffectedSubjectPart>();
-                return true;
-            }
-
             var sln = Microsoft.Build.Construction.SolutionFile.Parse(SlnFullFilePath);
-
             if (sln is null)
             {
                 //sln не найден
@@ -118,6 +110,21 @@ namespace RebuildAnalyzer.Analyzer.Solution
             });
 
             affectedParts = inProcessAffectedParts.ToList();
+
+            //after we determined affected parts, and REGARDLESS of these affected parts
+            //we need to check if sln files has changed and return true if so
+            //we cannot do this before parts processing because we need to return actual
+            //affected parts even if sln has changed
+            //(merge request can change cs files and sln files and we must return
+            //affected parts regardless of sln status)
+
+            //check if sln has changed
+            if (changeset.Contains(SlnRelativeFilePath))
+            {
+                //сам sln изменился
+                return true;
+            }
+
             return affectedParts.Count > 0;
         }
 
