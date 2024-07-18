@@ -129,26 +129,23 @@ namespace RebuildAnalyzer.Analyzer
                     );
 
             var subjects = ScanForSubjects();
+            var skippedProjects = GetSkippedProjects();
 
+            var everythingChanged = false;
             if (changeset.ContainsAtAnyLevel(DirectoryBuildProps))
             {
-                //все субъекты затронуты
-                return new(
-                    subjects.ConvertAll(a => new SubjectAnalyzeResult(a))
-                    );
+                //we threat this as every subject has changed
+                everythingChanged = true;
             }
             if (changeset.ContainsAtAnyLevel(DirectoryPackagesProps))
             {
-                //все субъекты затронуты
-                return new(
-                    subjects.ConvertAll(a => new SubjectAnalyzeResult(a))
-                    );
+                //we threat this as every subject has changed
+                everythingChanged = true;
             }
             //TODO: Добавить еще файлы, которые влияют на множество sln, slnf, csproj
 
-            var subjectAnalyzeResults = new List<SubjectAnalyzeResult>();
 
-            var skippedProjects = GetSkippedProjects();
+            var subjectAnalyzeResults = new List<SubjectAnalyzeResult>();
             foreach (var subject in subjects)
             {
                 switch (subject.Kind)
@@ -170,6 +167,12 @@ namespace RebuildAnalyzer.Analyzer
                                         )
                                     );
                             }
+                            else if(everythingChanged)
+                            {
+                                subjectAnalyzeResults.Add(
+                                    new SubjectAnalyzeResult(subject)
+                                    );
+                            }
                         }
                         break;
                     case AnalyzeSubjectKindEnum.Slnf:
@@ -189,6 +192,12 @@ namespace RebuildAnalyzer.Analyzer
                                         )
                                     );
                             }
+                            else if (everythingChanged)
+                            {
+                                subjectAnalyzeResults.Add(
+                                    new SubjectAnalyzeResult(subject)
+                                    );
+                            }
                         }
                         break;
                     case AnalyzeSubjectKindEnum.Project:
@@ -199,20 +208,23 @@ namespace RebuildAnalyzer.Analyzer
                                     subject.RootFolder,
                                     subject.RelativeFilePath
                                     );
-                                if (pa != null)
+                                if (pa != null && pa.IsAffected(changeset))
                                 {
-                                    if (pa.IsAffected(changeset))
-                                    {
-                                        subjectAnalyzeResults.Add(
-                                            new SubjectAnalyzeResult(
-                                                subject,
-                                                new AffectedSubjectPart(
-                                                    AnalyzeSubjectKindEnum.Project,
-                                                    subject.RelativeFilePath
-                                                    )
+                                    subjectAnalyzeResults.Add(
+                                        new SubjectAnalyzeResult(
+                                            subject,
+                                            new AffectedSubjectPart(
+                                                AnalyzeSubjectKindEnum.Project,
+                                                subject.RelativeFilePath
                                                 )
-                                            );
-                                    }
+                                            )
+                                        );
+                                }
+                                else if (everythingChanged)
+                                {
+                                    subjectAnalyzeResults.Add(
+                                        new SubjectAnalyzeResult(subject)
+                                        );
                                 }
                             }
                         }
