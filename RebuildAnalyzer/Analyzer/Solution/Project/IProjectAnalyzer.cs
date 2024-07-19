@@ -7,6 +7,6 @@
         
         void Prepare();
 
-        bool IsAffected(Changeset changeset);
+        Changeset? IsAffected(Changeset changeset);
     }
 }

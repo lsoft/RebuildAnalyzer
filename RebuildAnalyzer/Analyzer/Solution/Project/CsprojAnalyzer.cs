@@ -54,22 +54,26 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
         }
 
 
-        public bool IsAffected(Changeset changeset)
+        public Changeset? IsAffected(Changeset changeset)
         {
             if (_projectFiles is null)
             {
                 throw new InvalidOperationException("Csproj analyzer is not prepared.");
             }
 
-            if (changeset.Contains(CsprojRelativeFilePath))
+            var subChangeset = changeset.BuildSubChangeset(_projectFiles);
+            if (subChangeset is not null)
             {
-                //сам csproj изменился
-                return true;
+                return subChangeset;
             }
 
-            var result = changeset.ContainsAny(_projectFiles);
+            if (changeset.Contains(CsprojRelativeFilePath))
+            {
+                //csproj itself has changed
+                return new Changeset(CsprojRelativeFilePath);
+            }
 
-            return result;
+            return null;
         }
 
         private EvaluationProjectWrapper EvaluateProject(

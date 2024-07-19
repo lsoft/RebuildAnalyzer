@@ -32,17 +32,17 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             //nothing to do
         }
 
-        public bool IsAffected(Changeset changeset)
+        public Changeset? IsAffected(Changeset changeset)
         {
             if (changeset.Contains(ShprojRelativeFilePath))
             {
                 //сам shproj изменился
-                return true;
+                return new(ShprojRelativeFilePath);
             }
 
             //shared items included into target project by itself
             //we do not need to analyze them by special way
-            return false;
+            return null;
         }
     }
 }

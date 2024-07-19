@@ -90,19 +90,22 @@ namespace RebuildAnalyzer.Analyzer.Solution
                     inProcessAffectedParts.Add(
                         new AffectedSubjectPart(
                             AnalyzeSubjectKindEnum.Project,
-                            relativeProjectFilePath
+                            relativeProjectFilePath,
+                            new Changeset(relativeProjectFilePath)
                             )
                         );
                     return;
                 }
 
-                if (projectAnalyzer.IsAffected(changeset))
+                var subChangeset = projectAnalyzer.IsAffected(changeset);
+                if (subChangeset is not null)
                 {
-                    //проект изменился, дальше крутить смысла нет
+                    //файлы в проекте изменились
                     inProcessAffectedParts.Add(
                         new AffectedSubjectPart(
                             AnalyzeSubjectKindEnum.Project,
-                            relativeProjectFilePath
+                            relativeProjectFilePath,
+                            subChangeset
                             )
                         );
                     return;

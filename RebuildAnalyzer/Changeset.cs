@@ -15,6 +15,8 @@ namespace RebuildAnalyzer
         /// </summary>
         private HashSet<string> _changedFiles;
 
+        public IReadOnlyCollection<string> ChangedFiles => _changedFiles;
+
         public bool IsEmpty => _changedFiles.Count == 0;
 
         /// <summary>
@@ -36,6 +38,20 @@ namespace RebuildAnalyzer
             }
 
             return new Changeset(changedFiles);
+        }
+
+        public Changeset()
+            : this([])
+        {
+            
+        }
+
+        public Changeset(
+            string changedFile
+            )
+            : this([changedFile])
+        {
+
         }
 
         public Changeset(
@@ -75,19 +91,29 @@ namespace RebuildAnalyzer
             return false;
         }
 
-        public bool ContainsAny(
+        /// <summary>
+        /// Return changeset relative the list of given project files.
+        /// </summary>
+        public Changeset? BuildSubChangeset(
             IEnumerable<string> projectFiles
             )
         {
-            foreach(var projectFile in projectFiles)
+            var sublist = new List<string>();
+
+            foreach (var projectFile in projectFiles)
             {
                 if(Contains(projectFile))
                 {
-                    return true;
+                    sublist.Add(projectFile);
                 }
             }
 
-            return false;
+            if (sublist.Count == 0)
+            {
+                return null;
+            }
+
+            return new(sublist);
         }
     }
 

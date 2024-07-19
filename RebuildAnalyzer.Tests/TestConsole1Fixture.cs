@@ -26,6 +26,8 @@ namespace RebuildAnalyzer.Tests
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ar.Results[0].Subject.RelativeFilePath);
             Assert.AreEqual(1, ar.Results[0].AffectedParts.Count);
             Assert.AreEqual(RepositoryAnalyzer.Project_Console1_RelativeFilePath, ar.Results[0].AffectedParts[0].RelativeProjectFilePath);
+            Assert.AreEqual(1, ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.Count);
+            Assert.AreEqual(changeset.ChangedFiles.First(), ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.First());
         }
 
         [Test]
@@ -45,6 +47,8 @@ namespace RebuildAnalyzer.Tests
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ar.Results[0].Subject.RelativeFilePath);
             Assert.AreEqual(1, ar.Results[0].AffectedParts.Count);
             Assert.AreEqual(RepositoryAnalyzer.Project_Console1_RelativeFilePath, ar.Results[0].AffectedParts[0].RelativeProjectFilePath);
+            Assert.AreEqual(1, ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.Count);
+            Assert.AreEqual(changeset.ChangedFiles.First(), ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.First());
         }
 
         [Test]
@@ -64,6 +68,8 @@ namespace RebuildAnalyzer.Tests
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ar.Results[0].Subject.RelativeFilePath);
             Assert.AreEqual(1, ar.Results[0].AffectedParts.Count);
             Assert.AreEqual(RepositoryAnalyzer.Project_Console1_RelativeFilePath, ar.Results[0].AffectedParts[0].RelativeProjectFilePath);
+            Assert.AreEqual(1, ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.Count);
+            Assert.AreEqual(changeset.ChangedFiles.First(), ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.First());
         }
 
 
@@ -83,6 +89,10 @@ namespace RebuildAnalyzer.Tests
 
             Assert.AreEqual(1, ass.Count);
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ass[0].RelativeFilePath);
+            Assert.AreEqual(1, ar.Results[0].AffectedParts.Count);
+            Assert.AreEqual(RepositoryAnalyzer.Project_Console1_RelativeFilePath, ar.Results[0].AffectedParts[0].RelativeProjectFilePath);
+            Assert.AreEqual(1, ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.Count);
+            Assert.AreEqual(changeset.ChangedFiles.First(), ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.First());
         }
 
         public sealed class RepositoryAnalyzer : Analyzer.RepositoryAnalyzer

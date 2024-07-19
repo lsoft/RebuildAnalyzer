@@ -1,5 +1,6 @@
 ﻿using RebuildAnalyzer.Analyzer.Solution;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
+using System.Runtime;
 
 namespace RebuildAnalyzer.Analyzer
 {
@@ -86,14 +87,20 @@ namespace RebuildAnalyzer.Analyzer
         {
             get;
         }
+
         public string RelativeProjectFilePath
+        {
+            get;
+        }
+        public Changeset Changeset
         {
             get;
         }
 
         internal AffectedSubjectPart(
             AnalyzeSubjectKindEnum kind,
-            string relativeProjectFilePath
+            string relativeProjectFilePath,
+            Changeset changeset
             )
         {
             if (relativeProjectFilePath is null)
@@ -101,8 +108,14 @@ namespace RebuildAnalyzer.Analyzer
                 throw new ArgumentNullException(nameof(relativeProjectFilePath));
             }
 
+            if (changeset is null)
+            {
+                throw new ArgumentNullException(nameof(changeset));
+            }
+
             Kind = kind;
             RelativeProjectFilePath = relativeProjectFilePath;
+            Changeset = changeset;
         }
     }
 
@@ -208,14 +221,16 @@ namespace RebuildAnalyzer.Analyzer
                                     subject.RootFolder,
                                     subject.RelativeFilePath
                                     );
-                                if (pa != null && pa.IsAffected(changeset))
+                                var subChangeset = pa?.IsAffected(changeset);
+                                if (subChangeset is not null)
                                 {
                                     subjectAnalyzeResults.Add(
                                         new SubjectAnalyzeResult(
                                             subject,
                                             new AffectedSubjectPart(
                                                 AnalyzeSubjectKindEnum.Project,
-                                                subject.RelativeFilePath
+                                                subject.RelativeFilePath,
+                                                subChangeset
                                                 )
                                             )
                                         );
