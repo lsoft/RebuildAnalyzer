@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>RebuildAnalyzer</id>
-    <version>0.5.1-alpha</version>
+    <version>0.5.2-alpha</version>
     <authors>ls</authors>
     <projectUrl>https://github.com/lsoft/RebuildAnalyzer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

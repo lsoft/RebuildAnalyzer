@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace RebuildAnalyzer
 {
@@ -65,6 +66,14 @@ namespace RebuildAnalyzer
 
             _changedFiles = new (changedFiles); //uniqueness is essential
         }
+
+        public Changeset Append(string filePath)
+        {
+            var list = new List<string>(_changedFiles);
+            list.Add(filePath);
+            return new Changeset(list);
+        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(string filePath)

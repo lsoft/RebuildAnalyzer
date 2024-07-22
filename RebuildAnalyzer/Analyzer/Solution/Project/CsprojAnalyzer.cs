@@ -62,18 +62,22 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             }
 
             var subChangeset = changeset.BuildSubChangeset(_projectFiles);
-            if (subChangeset is not null)
-            {
-                return subChangeset;
-            }
 
             if (changeset.Contains(CsprojRelativeFilePath))
             {
                 //csproj itself has changed
-                return new Changeset(CsprojRelativeFilePath);
+
+                if (subChangeset is not null)
+                {
+                    return subChangeset.Append(CsprojRelativeFilePath);
+                }
+                else
+                {
+                    return new Changeset(CsprojRelativeFilePath);
+                }
             }
 
-            return null;
+            return subChangeset;
         }
 
         private EvaluationProjectWrapper EvaluateProject(
