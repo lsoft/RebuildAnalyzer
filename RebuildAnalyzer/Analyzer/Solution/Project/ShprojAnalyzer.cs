@@ -27,17 +27,25 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             ShprojRelativeFilePath = shprojRelativeFilePath;
         }
 
-        public void Prepare()
+        public void Prepare(
+            AnalyzeRequest request
+            )
         {
             //nothing to do
         }
 
-        public Changeset? IsAffected(Changeset changeset)
+        public AffectedSubjectPart? IsAffected(
+            AnalyzeRequest request
+            )
         {
-            if (changeset.Contains(ShprojRelativeFilePath))
+            if (request.Changeset.Contains(ShprojRelativeFilePath))
             {
                 //сам shproj изменился
-                return new(ShprojRelativeFilePath);
+                return new AffectedSubjectPart(
+                    ProjectRelativeFilePath,
+                    new Changeset(ShprojRelativeFilePath),
+                    null
+                    );
             }
 
             //shared items included into target project by itself

@@ -1,6 +1,6 @@
 # Rebuild Analyzer
 
-An utility which analyzes your slnf/sln/csproj/shproj against a given changeset (the list of files) to determine what you need to rebuild.
+An utility which analyzes your slnf/sln/csproj/shproj against a given changeset (the list of files) to determine what you need to rebuild. It is really works!
 
 ## Status
 
@@ -13,56 +13,6 @@ Issues with repro will be appreciated.
 This utility parses your `slnf`/`sln`/`csproj` files to discover all included items and check it against an incoming changeset to determine if this slnf/sln/csproj has affected by the changeset.
 
 Parsing is powered by `Microsoft.Build` nuget.
-
-Example:
-
-```C#
-//test this repository
-var ra = new TestRepositoryAnalyzer();
-//determine which slnf/sln/csproj has changed
-var affs = ra.DetermineAffectedSubjects(changeset);
-//log the results:
-Console.WriteLine("Changed: " + string.Join(",", affs.Select(a => a.RelativeFilePath)));
-
-
-
-
-        /// <summary>
-        /// Test this repository.
-        /// </summary>
-        public sealed class TestRepositoryAnalyzer : RepositoryAnalyzer
-        {
-            /// <summary>
-            /// Test against multitarget csproj RebuildAnalyzer.Test.Subject.Console1
-            /// </summary>
-            public static Changeset TestChangeset1 = new Changeset(
-                new[]
-                {
-                    "RebuildAnalyzer.Test.Subject.Console1\\DotNet7File.cs"
-                }.ToHashSet()
-                );
-
-            protected override IReadOnlyList<string> GetSkippedProjects()
-            {
-                return new List<string>
-                {
-                };
-            }
-
-            protected override IReadOnlyList<AnalyzeSubject> ScanForSubjects()
-            {
-                return new List<AnalyzeSubject>
-                {
-                    new AnalyzeSubject(
-                        Path.GetFullPath(@"..\\..\\..\\..\\"),
-                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
-                        AnalyzeSubjectKindEnum.Sln
-                        ),
-                };
-            }
-        }
-
-```
 
 ## Notes
 

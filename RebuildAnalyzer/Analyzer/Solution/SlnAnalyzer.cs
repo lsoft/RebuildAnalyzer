@@ -49,7 +49,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
         }
 
         public bool IsAffected(
-            Changeset changeset,
+            AnalyzeRequest request,
             out List<AffectedSubjectPart>? affectedParts
             )
         {
@@ -82,47 +82,45 @@ namespace RebuildAnalyzer.Analyzer.Solution
 
                 var projectAnalyzer = _projectAnalyzerFactory.TryCreate(
                     slnFolder,
-                    relativeProjectFilePath
+                    relativeProjectFilePath,
+                    request
                     );
                 if (projectAnalyzer is null)
                 {
                     //неизвестный проект, поэтому, на всякий случай, сообщаем, что sln изменился
                     inProcessAffectedParts.Add(
                         new AffectedSubjectPart(
-                            AnalyzeSubjectKindEnum.Project,
                             relativeProjectFilePath,
-                            new Changeset(relativeProjectFilePath)
+                            new Changeset(relativeProjectFilePath),
+                            null
                             )
                         );
                     return;
                 }
 
-                var subChangeset = projectAnalyzer.IsAffected(changeset);
-                if (subChangeset is not null)
+                var affectedSubjectPart = projectAnalyzer.IsAffected(request);
+                if (affectedSubjectPart is not null)
                 {
-                    //файлы в проекте изменились
-                    inProcessAffectedParts.Add(
-                        new AffectedSubjectPart(
-                            AnalyzeSubjectKindEnum.Project,
-                            relativeProjectFilePath,
-                            subChangeset
-                            )
-                        );
-                    return;
+                    //if (!affectedSubjectPart.Changeset.IsEmpty)
+                    {
+                        //файлы в проекте изменились
+                        inProcessAffectedParts.Add(affectedSubjectPart);
+                        return;
+                    }
                 }
             });
 
             affectedParts = inProcessAffectedParts.ToList();
 
             //after we determined affected parts, and REGARDLESS of these affected parts
-            //we need to check if sln files has changed and return true if so
+            //we need to check if sln files has changed and return true if so.
             //we cannot do this before parts processing because we need to return actual
             //affected parts even if sln has changed
             //(merge request can change cs files and sln files and we must return
-            //affected parts regardless of sln status)
+            //affected parts regardless of sln status).
 
             //check if sln has changed
-            if (changeset.Contains(SlnRelativeFilePath))
+            if (request.Changeset.Contains(SlnRelativeFilePath))
             {
                 //сам sln изменился
                 return true;

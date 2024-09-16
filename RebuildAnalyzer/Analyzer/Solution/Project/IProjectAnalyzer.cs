@@ -4,9 +4,12 @@
     {
         string ProjectRelativeFilePath { get; }
 
-        
-        void Prepare();
+        void Prepare(
+            AnalyzeRequest request
+            );
 
-        Changeset? IsAffected(Changeset changeset);
+        AffectedSubjectPart? IsAffected(
+            AnalyzeRequest request
+            );
     }
 }

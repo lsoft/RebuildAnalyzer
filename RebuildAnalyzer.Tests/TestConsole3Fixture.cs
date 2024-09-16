@@ -1,4 +1,5 @@
 using RebuildAnalyzer.Analyzer;
+using RebuildAnalyzer.ConsoleApp;
 
 namespace RebuildAnalyzer.Tests
 {
@@ -20,7 +21,12 @@ namespace RebuildAnalyzer.Tests
                 );
 
             var tra = new RepositoryAnalyzer();
-            var ar = tra.DetermineAffectedSubjects(changeset);
+            var ar = tra.DetermineAffectedSubjects(
+                new AnalyzeRequest(
+                    changeset,
+                    ChangingRegressionsContainer.Build
+                    )
+                );
 
             Assert.AreEqual(1, ar.Results.Count);
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ar.Results[0].Subject.RelativeFilePath);
@@ -28,6 +34,12 @@ namespace RebuildAnalyzer.Tests
             Assert.AreEqual(RepositoryAnalyzer.Project_Console3_RelativeFilePath, ar.Results[0].AffectedParts[0].RelativeProjectFilePath);
             Assert.AreEqual(1, ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.Count);
             Assert.AreEqual(changeset.ChangedFiles.First(), ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.First());
+
+            Assert.IsNotNull(ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults);
+            Assert.IsInstanceOf<ChangingRegressionsContainer>(ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults);
+            Assert.AreEqual(2, ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.Count);
+            Assert.AreEqual("Regression text Common 0", ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.First());
+            Assert.AreEqual("Regression text Common 1", ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.Second());
         }
 
 
@@ -42,7 +54,12 @@ namespace RebuildAnalyzer.Tests
                 );
 
             var tra = new RepositoryAnalyzer();
-            var ar = tra.DetermineAffectedSubjects(changeset);
+            var ar = tra.DetermineAffectedSubjects(
+                new AnalyzeRequest(
+                    changeset,
+                    ChangingRegressionsContainer.Build
+                    )
+                );
 
             Assert.AreEqual(1, ar.Results.Count);
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ar.Results[0].Subject.RelativeFilePath);
@@ -50,6 +67,13 @@ namespace RebuildAnalyzer.Tests
             Assert.AreEqual(RepositoryAnalyzer.Project_Common23_RelativeFilePath, ar.Results[0].AffectedParts[0].RelativeProjectFilePath);
             Assert.AreEqual(1, ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.Count);
             Assert.AreEqual(changeset.ChangedFiles.First(), ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.First());
+
+            Assert.IsNotNull(ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults);
+            Assert.IsInstanceOf<ChangingRegressionsContainer>(ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults);
+            Assert.AreEqual(3, ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.Count);
+            Assert.AreEqual("Regression text Common 0", ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.First());
+            Assert.AreEqual("Regression text Common 1", ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.Second());
+            Assert.AreEqual("Regression text Common23 0", ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.Third());
         }
 
         [Test]
@@ -63,7 +87,12 @@ namespace RebuildAnalyzer.Tests
                 );
 
             var tra = new RepositoryAnalyzer();
-            var ar = tra.DetermineAffectedSubjects(changeset);
+            var ar = tra.DetermineAffectedSubjects(
+                new AnalyzeRequest(
+                    changeset,
+                    ChangingRegressionsContainer.Build
+                    )
+                );
 
             Assert.AreEqual(1, ar.Results.Count);
             Assert.AreEqual(RepositoryAnalyzer.SlnRelativeFilePath, ar.Results[0].Subject.RelativeFilePath);
@@ -71,9 +100,15 @@ namespace RebuildAnalyzer.Tests
             Assert.AreEqual(RepositoryAnalyzer.Project_Console3_RelativeFilePath, ar.Results[0].AffectedParts[0].RelativeProjectFilePath);
             Assert.AreEqual(1, ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.Count);
             Assert.AreEqual(changeset.ChangedFiles.First(), ar.Results[0].AffectedParts[0].Changeset.ChangedFiles.First());
+
+            Assert.IsNotNull(ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults);
+            Assert.IsInstanceOf<ChangingRegressionsContainer>(ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults);
+            Assert.AreEqual(2, ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.Count);
+            Assert.AreEqual("Regression text Common 0", ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.First());
+            Assert.AreEqual("Regression text Common 1", ((ChangingRegressionsContainer)ar.Results[0].AffectedParts[0].AdditionalAnalyzerResults).FoundRegressions.Second());
         }
 
-        public sealed class RepositoryAnalyzer : Analyzer.RepositoryAnalyzer
+        private sealed class RepositoryAnalyzer : Analyzer.RepositoryAnalyzer
         {
             public const string SlnRelativeFilePath = "RebuildAnalyzer.Test.Subject.Console3.sln";
             public const string Project_Console3_RelativeFilePath = @"RebuildAnalyzer.Test.Subject.Console3\RebuildAnalyzer.Test.Subject.Console3.csproj";

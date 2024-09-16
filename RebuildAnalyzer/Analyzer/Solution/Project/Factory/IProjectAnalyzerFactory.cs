@@ -4,7 +4,8 @@
     {
         IProjectAnalyzer? TryCreate(
             string rootFolder,
-            string projectRelativeFilePath
+            string projectRelativeFilePath,
+            AnalyzeRequest request
             );
     }
 }

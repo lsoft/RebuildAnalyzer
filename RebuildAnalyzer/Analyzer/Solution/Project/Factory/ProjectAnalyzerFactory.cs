@@ -5,14 +5,15 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
 {
     public sealed class ProjectAnalyzerFactory : IProjectAnalyzerFactory
     {
-        private EvaluationContext _evaluationContext =
+        private readonly EvaluationContext _evaluationContext =
             EvaluationContext.Create(
                 EvaluationContext.SharingPolicy.Shared
                 );
 
         public IProjectAnalyzer? TryCreate(
             string rootFolder,
-            string projectRelativeFilePath
+            string projectRelativeFilePath,
+            AnalyzeRequest request
             )
         {
             var realProjectAnalyzer = BuildRealAnalyzer(
@@ -20,7 +21,9 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
                 projectRelativeFilePath
                 );
 
-            realProjectAnalyzer.Prepare();
+            realProjectAnalyzer.Prepare(
+                request
+                );
 
             return realProjectAnalyzer;
         }

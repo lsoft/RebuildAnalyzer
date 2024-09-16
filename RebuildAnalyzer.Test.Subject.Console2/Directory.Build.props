@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <ChangingRegressions>
+      <ChangingRegression>Regression text Console2 0</ChangingRegression>
+    </ChangingRegressions>
+  </PropertyGroup>
+
+</Project>

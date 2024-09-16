@@ -10,24 +10,38 @@ namespace RebuildAnalyzer.ConsoleApp
         {
             MSBuildLocator.RegisterDefaults();
 
-            var changeset = TestRepositoryAnalyzer.TestChangeset1;
-
             RebuildAnalyzer.Helper.ParallelOption.MaxDegreeOfParallelism = 1;
 
             var sw = Stopwatch.StartNew();
 
             var tra = new TestRepositoryAnalyzer();
-            var ar = tra.DetermineAffectedSubjects(changeset);
+
+            AnalyzeResult ar = DoProcessing(tra);
+
             var affs = ar.Results.Select(a => a.Subject).ToList();
             Console.WriteLine("Changed: " + string.Join(",", affs.Select(a => a.RelativeFilePath)));
 
             Console.WriteLine("Taken: " + sw.Elapsed);
         }
 
+        private static AnalyzeResult DoProcessing(
+            TestRepositoryAnalyzer tra
+            )
+        {
+            var changeset = TestRepositoryAnalyzer.TestChangeset1;
+            var request = new AnalyzeRequest(
+                changeset,
+                ChangingRegressionsContainer.Build
+                );
+
+            var ar = tra.DetermineAffectedSubjects(request);
+            return ar;
+        }
+
         /// <summary>
         /// Test this repository.
         /// </summary>
-        public sealed class TestRepositoryAnalyzer : RepositoryAnalyzer
+        private sealed class TestRepositoryAnalyzer : RepositoryAnalyzer
         {
             /// <summary>
             /// Test against multitarget csproj RebuildAnalyzer.Test.Subject.Console1
@@ -55,34 +69,9 @@ namespace RebuildAnalyzer.ConsoleApp
                         @"RebuildAnalyzer.Test.Subject.Console1.sln",
                         AnalyzeSubjectKindEnum.Sln
                         ),
-                    new AnalyzeSubject(
-                        Path.GetFullPath(@"..\\..\\..\\..\\"),
-                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
-                        AnalyzeSubjectKindEnum.Sln
-                        ),
-                    new AnalyzeSubject(
-                        Path.GetFullPath(@"..\\..\\..\\..\\"),
-                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
-                        AnalyzeSubjectKindEnum.Sln
-                        ),
-                    new AnalyzeSubject(
-                        Path.GetFullPath(@"..\\..\\..\\..\\"),
-                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
-                        AnalyzeSubjectKindEnum.Sln
-                        ),
-                    new AnalyzeSubject(
-                        Path.GetFullPath(@"..\\..\\..\\..\\"),
-                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
-                        AnalyzeSubjectKindEnum.Sln
-                        ),
-                    new AnalyzeSubject(
-                        Path.GetFullPath(@"..\\..\\..\\..\\"),
-                        @"RebuildAnalyzer.Test.Subject.Console1.sln",
-                        AnalyzeSubjectKindEnum.Sln
-                        ),
                 };
             }
         }
-
     }
+
 }

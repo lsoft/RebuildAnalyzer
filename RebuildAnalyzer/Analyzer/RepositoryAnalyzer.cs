@@ -1,4 +1,5 @@
-﻿using RebuildAnalyzer.Analyzer.Solution;
+﻿using Microsoft.Build.Evaluation;
+using RebuildAnalyzer.Analyzer.Solution;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using System.Runtime;
 
@@ -40,6 +41,7 @@ namespace RebuildAnalyzer.Analyzer
         {
             get;
         }
+
         public IReadOnlyList<AffectedSubjectPart> AffectedParts
         {
             get;
@@ -83,29 +85,30 @@ namespace RebuildAnalyzer.Analyzer
     /// </summary>
     public sealed class AffectedSubjectPart
     {
-        public AnalyzeSubjectKindEnum Kind
-        {
-            get;
-        }
-
         public string RelativeProjectFilePath
         {
             get;
         }
+
         public Changeset Changeset
         {
             get;
         }
 
+        public object? AdditionalAnalyzerResults
+        {
+            get;
+        }
+
         internal AffectedSubjectPart(
-            AnalyzeSubjectKindEnum kind,
             string relativeProjectFilePath,
-            Changeset changeset
+            Changeset changeset,
+            object? additionalAnalyzerResults
             )
         {
-            if (relativeProjectFilePath is null)
+            if (string.IsNullOrEmpty(relativeProjectFilePath))
             {
-                throw new ArgumentNullException(nameof(relativeProjectFilePath));
+                throw new ArgumentException($"'{nameof(relativeProjectFilePath)}' cannot be null or empty.", nameof(relativeProjectFilePath));
             }
 
             if (changeset is null)
@@ -113,11 +116,44 @@ namespace RebuildAnalyzer.Analyzer
                 throw new ArgumentNullException(nameof(changeset));
             }
 
-            Kind = kind;
             RelativeProjectFilePath = relativeProjectFilePath;
             Changeset = changeset;
+            AdditionalAnalyzerResults = additionalAnalyzerResults;
         }
     }
+
+    /// <summary>
+    /// Analyze request.
+    /// </summary>
+    public sealed class AnalyzeRequest
+    {
+        /// <summary>
+        /// Changeset (list of changed (created, modified, deleted) files.
+        /// </summary>
+        public Changeset Changeset { get; }
+
+        /// <summary>
+        /// Additional "analyzer" for msbuild project.
+        /// Its results will be included in <see cref="AffectedSubjectPart"/> inside <see cref="AnalyzeResult"/>.
+        /// </summary>
+        public Func<Project, object?, object?>? AdditionalProjectAnalyzer { get; }
+
+        public AnalyzeRequest(
+            Changeset changeset,
+            Func<Microsoft.Build.Evaluation.Project, object?, object?>? additionalProjectAnalyzer
+            )
+        {
+            if (changeset is null)
+            {
+                throw new ArgumentNullException(nameof(changeset));
+            }
+
+            Changeset = changeset;
+            AdditionalProjectAnalyzer = additionalProjectAnalyzer;
+        }
+
+    }
+
 
     public abstract class RepositoryAnalyzer
     {
@@ -128,9 +164,11 @@ namespace RebuildAnalyzer.Analyzer
 
         protected abstract List<AnalyzeSubject> ScanForSubjects();
 
-        public AnalyzeResult DetermineAffectedSubjects(Changeset changeset)
+        public AnalyzeResult DetermineAffectedSubjects(
+            AnalyzeRequest request
+            )
         {
-            if(changeset.IsEmpty)
+            if(request.Changeset.IsEmpty)
             {
                 return new AnalyzeResult();
             }
@@ -145,12 +183,12 @@ namespace RebuildAnalyzer.Analyzer
             var skippedProjects = GetSkippedProjects();
 
             var everythingChanged = false;
-            if (changeset.ContainsAtAnyLevel(DirectoryBuildProps))
+            if (request.Changeset.ContainsAtAnyLevel(DirectoryBuildProps))
             {
                 //we threat this as every subject has changed
                 everythingChanged = true;
             }
-            if (changeset.ContainsAtAnyLevel(DirectoryPackagesProps))
+            if (request.Changeset.ContainsAtAnyLevel(DirectoryPackagesProps))
             {
                 //we threat this as every subject has changed
                 everythingChanged = true;
@@ -171,7 +209,7 @@ namespace RebuildAnalyzer.Analyzer
                                 subject.RootFolder,
                                 subject.RelativeFilePath
                                 );
-                            if (slna.IsAffected(changeset, out var affectedParts))
+                            if (slna.IsAffected(request, out var affectedParts))
                             {
                                 subjectAnalyzeResults.Add(
                                     new SubjectAnalyzeResult(
@@ -196,7 +234,7 @@ namespace RebuildAnalyzer.Analyzer
                                 subject.RootFolder,
                                 subject.RelativeFilePath
                                 );
-                            if (slnfa.IsAffected(changeset, out var affectedParts))
+                            if (slnfa.IsAffected(request, out var affectedParts))
                             {
                                 subjectAnalyzeResults.Add(
                                     new SubjectAnalyzeResult(
@@ -219,19 +257,16 @@ namespace RebuildAnalyzer.Analyzer
                             {
                                 var pa = projectAnalyzerFactory.TryCreate(
                                     subject.RootFolder,
-                                    subject.RelativeFilePath
+                                    subject.RelativeFilePath,
+                                    request
                                     );
-                                var subChangeset = pa?.IsAffected(changeset);
-                                if (subChangeset is not null)
+                                var affectedSubjectPart = pa?.IsAffected(request);
+                                if (affectedSubjectPart is not null)
                                 {
                                     subjectAnalyzeResults.Add(
                                         new SubjectAnalyzeResult(
                                             subject,
-                                            new AffectedSubjectPart(
-                                                AnalyzeSubjectKindEnum.Project,
-                                                subject.RelativeFilePath,
-                                                subChangeset
-                                                )
+                                            affectedSubjectPart
                                             )
                                         );
                                 }

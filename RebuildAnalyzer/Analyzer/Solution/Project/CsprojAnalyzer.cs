@@ -1,4 +1,5 @@
 ﻿using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
 using RebuildAnalyzer.Helper;
 using RebuildAnalyzer.MsBuild;
@@ -10,6 +11,7 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
         private readonly EvaluationContext _evaluationContext;
 
         private HashSet<string>? _projectFiles;
+        private object? _additionalAnalyzerResults;
 
         public string RootFolder { get; }
 
@@ -48,56 +50,9 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             CsprojRelativeFilePath = csprojRelativeFilePath;
         }
 
-        public void Prepare()
-        {
-            _projectFiles = DetermineProjectFiles();
-        }
-
-
-        public Changeset? IsAffected(Changeset changeset)
-        {
-            if (_projectFiles is null)
-            {
-                throw new InvalidOperationException("Csproj analyzer is not prepared.");
-            }
-
-            var subChangeset = changeset.BuildSubChangeset(_projectFiles);
-
-            if (changeset.Contains(CsprojRelativeFilePath))
-            {
-                //csproj itself has changed
-
-                if (subChangeset is not null)
-                {
-                    return subChangeset.Append(CsprojRelativeFilePath);
-                }
-                else
-                {
-                    return new Changeset(CsprojRelativeFilePath);
-                }
-            }
-
-            return subChangeset;
-        }
-
-        private EvaluationProjectWrapper EvaluateProject(
-            Microsoft.Build.Construction.ProjectRootElement projectXmlRoot,
-            ProjectOptions? projectOptions = null
+        public void Prepare(
+            AnalyzeRequest request
             )
-        {
-            var evaluatedProject = Microsoft.Build.Evaluation.Project.FromProjectRootElement(
-                projectXmlRoot,
-                projectOptions ?? new Microsoft.Build.Definition.ProjectOptions
-                {
-                    EvaluationContext = _evaluationContext
-                }
-                );
-
-            return new EvaluationProjectWrapper(evaluatedProject);
-        }
-
-
-        private HashSet<string> DetermineProjectFiles()
         {
             var projectXmlRoot = Microsoft.Build.Construction.ProjectRootElement.Open(
                 CsprojFullFilePath
@@ -110,7 +65,7 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             var configurations = preEvaluatedProject.DetermineConfigurations();
             var targetFrameworks = preEvaluatedProject.DetermineTargetFrameworks();
 
-            var allProjectFiles = new HashSet<string>();
+            _projectFiles = new HashSet<string>();
             foreach (var configuration in configurations)
             {
                 foreach (var targetFramework in targetFrameworks)
@@ -128,15 +83,93 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                         }
                         );
 
+                    if (request.AdditionalProjectAnalyzer is not null)
+                    {
+                        _additionalAnalyzerResults = request.AdditionalProjectAnalyzer(
+                            evaluatedProject.Project,
+                            _additionalAnalyzerResults
+                            );
+                    }
+
                     var projectFiles = evaluatedProject.ScanForProjectFiles(
                         RootFolder,
                         CsprojFullFolderPath
                         );
-                    allProjectFiles.AddRange(projectFiles);
+                    _projectFiles.AddRange(projectFiles);
                 }
             }
 
-            return allProjectFiles;
+
+        }
+
+
+        public AffectedSubjectPart? IsAffected(
+            AnalyzeRequest request
+            )
+        {
+            if (_projectFiles is null)
+            {
+                throw new InvalidOperationException("Csproj analyzer is not prepared.");
+            }
+
+            var subChangeset = request.Changeset.BuildSubChangeset(_projectFiles);
+
+            if (request.Changeset.Contains(CsprojRelativeFilePath))
+            {
+                //csproj itself has changed
+
+                if (subChangeset is not null)
+                {
+                    return new AffectedSubjectPart(
+                        CsprojRelativeFilePath,
+                        subChangeset.Append(CsprojRelativeFilePath),
+                        _additionalAnalyzerResults
+                        );
+                }
+                else
+                {
+                    return new AffectedSubjectPart(
+                        CsprojRelativeFilePath,
+                        new Changeset(CsprojRelativeFilePath),
+                        _additionalAnalyzerResults
+                        );
+                }
+            }
+
+            if (subChangeset is null)
+            {
+                return null;
+            }
+
+            return new AffectedSubjectPart(
+                CsprojRelativeFilePath,
+                subChangeset,
+                _additionalAnalyzerResults
+                );
+        }
+
+        private EvaluationProjectWrapper EvaluateProject(
+            Microsoft.Build.Construction.ProjectRootElement projectXmlRoot,
+            ProjectOptions? projectOptions = null
+            )
+        {
+            var workingProjectOptions = projectOptions ?? new Microsoft.Build.Definition.ProjectOptions
+            {
+                EvaluationContext = _evaluationContext
+            };
+
+            var projectCollection = new Microsoft.Build.Evaluation.ProjectCollection();
+            workingProjectOptions.ProjectCollection = projectCollection;
+
+            var evaluatedProject = Microsoft.Build.Evaluation.Project.FromProjectRootElement(
+                projectXmlRoot,
+                workingProjectOptions
+                );
+
+            return new EvaluationProjectWrapper(
+                evaluatedProject,
+                projectCollection
+                );
         }
 
     }

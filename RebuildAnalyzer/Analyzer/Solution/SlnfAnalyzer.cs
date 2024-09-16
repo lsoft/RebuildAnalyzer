@@ -49,7 +49,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
         }
 
         public bool IsAffected(
-            Changeset changeset,
+            AnalyzeRequest request,
             out List<AffectedSubjectPart>? affectedParts
             )
         {
@@ -81,32 +81,27 @@ namespace RebuildAnalyzer.Analyzer.Solution
 
                 var projectAnalyzer = _projectAnalyzerFactory.TryCreate(
                     slnFolderPath, //relativeProjectFilePath relative against SLN file, not a slnF file!
-                    relativeProjectFilePath
+                    relativeProjectFilePath,
+                    request
                     );
                 if (projectAnalyzer is null)
                 {
                     //неизвестный проект, поэтому, на всякий случай, сообщаем, что slnf изменился
                     inProcessAffectedParts.Add(
                         new AffectedSubjectPart(
-                            AnalyzeSubjectKindEnum.Project,
                             relativeProjectFilePath,
-                            new Changeset(relativeProjectFilePath)
+                            new Changeset(relativeProjectFilePath),
+                            null
                             )
                         );
                     return;
                 }
 
-                var subChangeset = projectAnalyzer.IsAffected(changeset);
-                if (subChangeset is not null)
+                var affectedSubjectPart = projectAnalyzer.IsAffected(request);
+                if (affectedSubjectPart is not null)
                 {
                     //проект изменился, дальше крутить смысла нет
-                    inProcessAffectedParts.Add(
-                        new AffectedSubjectPart(
-                            AnalyzeSubjectKindEnum.Project,
-                            relativeProjectFilePath,
-                            subChangeset
-                            )
-                        );
+                    inProcessAffectedParts.Add(affectedSubjectPart);
                     return;
                 }
             });
@@ -114,14 +109,14 @@ namespace RebuildAnalyzer.Analyzer.Solution
             affectedParts = inProcessAffectedParts.ToList();
             
             //after we determined affected parts, and REGARDLESS of these affected parts
-            //we need to check if slnf or sln files has changed and return true if so
+            //we need to check if slnf or sln files has changed and return true if so.
             //we cannot do this before parts processing because we need to return actual
             //affected parts even if slnf/sln has changed
             //(merge request can change cs files and slnf/sln files and we must return
-            //affected parts regardless of slnf/sln status)
+            //affected parts regardless of slnf/sln status).
 
             //check if slnf has changed
-            if (changeset.Contains(SlnfRelativeFilePath))
+            if (request.Changeset.Contains(SlnfRelativeFilePath))
             {
                 //сам slnf изменился
                 return true;
@@ -131,7 +126,7 @@ namespace RebuildAnalyzer.Analyzer.Solution
             //TODO: здесь может быть ошибка с путями, если sln или slnf лежат не в корне репозитория
             //вероятно, путь к sln внутри slnf идет относительно САМОГО ФАЙЛА slnf, а не корня репозитория
             //а в ченжсете пути хранятся относительно корня репозитория
-            if (changeset.Contains(slnf.solution.path))
+            if (request.Changeset.Contains(slnf.solution.path))
             {
                 //сам sln изменился
                 return true;

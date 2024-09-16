@@ -33,7 +33,8 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
 
         public IProjectAnalyzer? TryCreate(
             string rootFolder,
-            string projectRelativeFilePath
+            string projectRelativeFilePath,
+            AnalyzeRequest request
             )
         {
             Interlocked.Increment(ref _totalAnalyzerCreateInvocation);
@@ -43,7 +44,8 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
             {
                 projectAnalyzer = CreateInnerProjectAnalyzer(
                     rootFolder,
-                    projectRelativeFilePath
+                    projectRelativeFilePath,
+                    request
                     );
 
                 _ = _cache.TryAdd(projectRelativeFilePath, projectAnalyzer);
@@ -58,7 +60,8 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
 
         private IProjectAnalyzer? CreateInnerProjectAnalyzer(
             string rootFolder,
-            string projectRelativeFilePath
+            string projectRelativeFilePath,
+            AnalyzeRequest request
             )
         {
             IProjectAnalyzer? result = null;
@@ -66,7 +69,11 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
             var sw = Stopwatch.StartNew();
             try
             {
-                result = _projectAnalyzerFactory.TryCreate(rootFolder, projectRelativeFilePath);
+                result = _projectAnalyzerFactory.TryCreate(
+                    rootFolder,
+                    projectRelativeFilePath,
+                    request
+                    );
             }
             finally
             {
