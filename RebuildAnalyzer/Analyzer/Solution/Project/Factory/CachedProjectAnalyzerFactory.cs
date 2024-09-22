@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using RebuildAnalyzer.Analyzer.Request;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory

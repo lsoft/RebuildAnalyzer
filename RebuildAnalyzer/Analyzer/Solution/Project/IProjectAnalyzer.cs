@@ -1,4 +1,7 @@
-﻿namespace RebuildAnalyzer.Analyzer.Solution.Project
+﻿using RebuildAnalyzer.Analyzer.Request;
+using RebuildAnalyzer.Analyzer.Result;
+
+namespace RebuildAnalyzer.Analyzer.Solution.Project
 {
     public interface IProjectAnalyzer
     {

@@ -1,4 +1,6 @@
-﻿namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
+﻿using RebuildAnalyzer.Analyzer.Request;
+
+namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory
 {
     public interface IProjectAnalyzerFactory
     {

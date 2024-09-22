@@ -1,160 +1,11 @@
-﻿using Microsoft.Build.Evaluation;
+﻿using RebuildAnalyzer.Analyzer.Request;
+using RebuildAnalyzer.Analyzer.Result;
 using RebuildAnalyzer.Analyzer.Solution;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using System.Runtime;
 
 namespace RebuildAnalyzer.Analyzer
 {
-    /// <summary>
-    /// Results of repository analyze.
-    /// </summary>
-    public sealed class AnalyzeResult
-    {
-        private readonly List<SubjectAnalyzeResult> _results = new();
-
-        public IReadOnlyList<SubjectAnalyzeResult> Results => _results;
-
-        internal AnalyzeResult()
-        {
-        }
-
-        internal AnalyzeResult(
-            List<SubjectAnalyzeResult> results
-            )
-        {
-            if (results is null)
-            {
-                throw new ArgumentNullException(nameof(results));
-            }
-
-            _results = results;
-        }
-    }
-
-
-    /// <summary>
-    /// Results of subject analyze.
-    /// </summary>
-    public sealed class SubjectAnalyzeResult
-    {
-        public AnalyzeSubject Subject
-        {
-            get;
-        }
-
-        public IReadOnlyList<AffectedSubjectPart> AffectedParts
-        {
-            get;
-        }
-
-        internal SubjectAnalyzeResult(
-            AnalyzeSubject subject
-            ) : this(subject, new List<AffectedSubjectPart>())
-        {
-        }
-
-        internal SubjectAnalyzeResult(
-            AnalyzeSubject subject,
-            AffectedSubjectPart affectedPart
-            ) : this(subject, new List<AffectedSubjectPart> { affectedPart })
-        {
-        }
-
-        internal SubjectAnalyzeResult(
-            AnalyzeSubject subject,
-            IReadOnlyList<AffectedSubjectPart>? affectedParts
-            )
-        {
-            if (subject is null)
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-
-            if (affectedParts is null)
-            {
-                throw new ArgumentNullException(nameof(affectedParts));
-            }
-
-            Subject = subject;
-            AffectedParts = affectedParts ?? new List<AffectedSubjectPart>();
-        }
-    }
-
-    /// <summary>
-    /// Affected subject part (usually, a project, csproj or something).
-    /// </summary>
-    public sealed class AffectedSubjectPart
-    {
-        public string RelativeProjectFilePath
-        {
-            get;
-        }
-
-        public Changeset Changeset
-        {
-            get;
-        }
-
-        public object? AdditionalAnalyzerResults
-        {
-            get;
-        }
-
-        internal AffectedSubjectPart(
-            string relativeProjectFilePath,
-            Changeset changeset,
-            object? additionalAnalyzerResults
-            )
-        {
-            if (string.IsNullOrEmpty(relativeProjectFilePath))
-            {
-                throw new ArgumentException($"'{nameof(relativeProjectFilePath)}' cannot be null or empty.", nameof(relativeProjectFilePath));
-            }
-
-            if (changeset is null)
-            {
-                throw new ArgumentNullException(nameof(changeset));
-            }
-
-            RelativeProjectFilePath = relativeProjectFilePath;
-            Changeset = changeset;
-            AdditionalAnalyzerResults = additionalAnalyzerResults;
-        }
-    }
-
-    /// <summary>
-    /// Analyze request.
-    /// </summary>
-    public sealed class AnalyzeRequest
-    {
-        /// <summary>
-        /// Changeset (list of changed (created, modified, deleted) files.
-        /// </summary>
-        public Changeset Changeset { get; }
-
-        /// <summary>
-        /// Additional "analyzer" for msbuild project.
-        /// Its results will be included in <see cref="AffectedSubjectPart"/> inside <see cref="AnalyzeResult"/>.
-        /// </summary>
-        public Func<Project, object?, object?>? AdditionalProjectAnalyzer { get; }
-
-        public AnalyzeRequest(
-            Changeset changeset,
-            Func<Microsoft.Build.Evaluation.Project, object?, object?>? additionalProjectAnalyzer
-            )
-        {
-            if (changeset is null)
-            {
-                throw new ArgumentNullException(nameof(changeset));
-            }
-
-            Changeset = changeset;
-            AdditionalProjectAnalyzer = additionalProjectAnalyzer;
-        }
-
-    }
-
-
     public abstract class RepositoryAnalyzer
     {
         public const string DirectoryBuildProps = "Directory.Build.props";
@@ -199,88 +50,26 @@ namespace RebuildAnalyzer.Analyzer
             var subjectAnalyzeResults = new List<SubjectAnalyzeResult>();
             foreach (var subject in subjects)
             {
-                switch (subject.Kind)
+                try
                 {
-                    case AnalyzeSubjectKindEnum.Sln:
-                        {
-                            var slna = new SlnAnalyzer(
-                                projectAnalyzerFactory,
-                                skippedProjects,
-                                subject.RootFolder,
-                                subject.RelativeFilePath
-                                );
-                            if (slna.IsAffected(request, out var affectedParts))
-                            {
-                                subjectAnalyzeResults.Add(
-                                    new SubjectAnalyzeResult(
-                                        subject,
-                                        affectedParts
-                                        )
-                                    );
-                            }
-                            else if(everythingChanged)
-                            {
-                                subjectAnalyzeResults.Add(
-                                    new SubjectAnalyzeResult(subject)
-                                    );
-                            }
-                        }
-                        break;
-                    case AnalyzeSubjectKindEnum.Slnf:
-                        {
-                            var slnfa = new SlnfAnalyzer(
-                                projectAnalyzerFactory,
-                                skippedProjects,
-                                subject.RootFolder,
-                                subject.RelativeFilePath
-                                );
-                            if (slnfa.IsAffected(request, out var affectedParts))
-                            {
-                                subjectAnalyzeResults.Add(
-                                    new SubjectAnalyzeResult(
-                                        subject,
-                                        affectedParts
-                                        )
-                                    );
-                            }
-                            else if (everythingChanged)
-                            {
-                                subjectAnalyzeResults.Add(
-                                    new SubjectAnalyzeResult(subject)
-                                    );
-                            }
-                        }
-                        break;
-                    case AnalyzeSubjectKindEnum.Project:
-                        {
-                            if (!skippedProjects.Contains(subject.RelativeFilePath))
-                            {
-                                var pa = projectAnalyzerFactory.TryCreate(
-                                    subject.RootFolder,
-                                    subject.RelativeFilePath,
-                                    request
-                                    );
-                                var affectedSubjectPart = pa?.IsAffected(request);
-                                if (affectedSubjectPart is not null)
-                                {
-                                    subjectAnalyzeResults.Add(
-                                        new SubjectAnalyzeResult(
-                                            subject,
-                                            affectedSubjectPart
-                                            )
-                                        );
-                                }
-                                else if (everythingChanged)
-                                {
-                                    subjectAnalyzeResults.Add(
-                                        new SubjectAnalyzeResult(subject)
-                                        );
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        throw new InvalidOperationException(subject.Kind.ToString());
+                    var subjectAnalyzeResult = ProcessSubject(
+                        request,
+                        subject,
+                        projectAnalyzerFactory,
+                        skippedProjects,
+                        everythingChanged
+                        );
+                    if (subjectAnalyzeResult is not null)
+                    {
+                        subjectAnalyzeResults.Add(subjectAnalyzeResult);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new RepositoryAnalyzeException(
+                        $"Error has been detected when processing {subject.FullFilePath}",
+                        ex
+                        );
                 }
             }
 
@@ -289,6 +78,95 @@ namespace RebuildAnalyzer.Analyzer
             return new(
                 subjectAnalyzeResults
                 );
+        }
+
+        private static SubjectAnalyzeResult? ProcessSubject(
+            AnalyzeRequest request,
+            AnalyzeSubject subject,
+            CachedProjectAnalyzerFactory projectAnalyzerFactory,
+            IReadOnlyList<string> skippedProjects,
+            bool everythingChanged
+            )
+        {
+            switch (subject.Kind)
+            {
+                case AnalyzeSubjectKindEnum.Sln:
+                    {
+                        var slna = new SlnAnalyzer(
+                            projectAnalyzerFactory,
+                            skippedProjects,
+                            subject.RootFolder,
+                            subject.RelativeFilePath
+                            );
+                        if (slna.IsAffected(request, out var affectedParts))
+                        {
+                            return
+                                new SubjectAnalyzeResult(
+                                    subject,
+                                    affectedParts
+                                    );
+                        }
+                        else if (everythingChanged)
+                        {
+                            return
+                                new SubjectAnalyzeResult(subject);
+                        }
+                    }
+                    break;
+                case AnalyzeSubjectKindEnum.Slnf:
+                    {
+                        var slnfa = new SlnfAnalyzer(
+                            projectAnalyzerFactory,
+                            skippedProjects,
+                            subject.RootFolder,
+                            subject.RelativeFilePath
+                            );
+                        if (slnfa.IsAffected(request, out var affectedParts))
+                        {
+                            return
+                                new SubjectAnalyzeResult(
+                                    subject,
+                                    affectedParts
+                                    );
+                        }
+                        else if (everythingChanged)
+                        {
+                            return
+                                new SubjectAnalyzeResult(subject);
+                        }
+                    }
+                    break;
+                case AnalyzeSubjectKindEnum.Project:
+                    {
+                        if (skippedProjects.Contains(subject.RelativeFilePath))
+                        {
+                            return null;
+                        }
+
+                        var pa = projectAnalyzerFactory.TryCreate(
+                            subject.RootFolder,
+                            subject.RelativeFilePath,
+                            request
+                            );
+                        var affectedSubjectPart = pa?.IsAffected(request);
+                        if (affectedSubjectPart is not null)
+                        {
+                            return
+                                    new SubjectAnalyzeResult(
+                                    subject,
+                                    affectedSubjectPart
+                                    );
+                        }
+                        else if (everythingChanged)
+                        {
+                            return
+                                new SubjectAnalyzeResult(subject);
+                        }
+                    }
+                    break;
+            }
+
+            throw new InvalidOperationException($"{subject.Kind} is unknown kind of subject.");
         }
     }
 }

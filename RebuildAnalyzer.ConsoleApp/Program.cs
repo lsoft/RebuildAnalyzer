@@ -1,6 +1,8 @@
 ﻿using Microsoft.Build.Locator;
 using System.Diagnostics;
 using RebuildAnalyzer.Analyzer;
+using RebuildAnalyzer.Analyzer.Result;
+using RebuildAnalyzer.Analyzer.Request;
 
 namespace RebuildAnalyzer.ConsoleApp
 {

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using RebuildAnalyzer.Analyzer.Request;
+using RebuildAnalyzer.Analyzer.Result;
 using RebuildAnalyzer.Helper;
 using RebuildAnalyzer.MsBuild;
 

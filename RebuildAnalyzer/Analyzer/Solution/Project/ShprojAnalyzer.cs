@@ -1,4 +1,6 @@
 ﻿using System.Xml.Serialization;
+using RebuildAnalyzer.Analyzer.Request;
+using RebuildAnalyzer.Analyzer.Result;
 using RebuildAnalyzer.FileStructure;
 using RebuildAnalyzer.Helper;
 

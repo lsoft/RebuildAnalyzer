@@ -1,4 +1,5 @@
 ﻿using Microsoft.Build.Evaluation.Context;
+using RebuildAnalyzer.Analyzer.Request;
 using System.Runtime.CompilerServices;
 
 namespace RebuildAnalyzer.Analyzer.Solution.Project.Factory

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Build.Construction;
+using RebuildAnalyzer.Analyzer.Request;
+using RebuildAnalyzer.Analyzer.Result;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using RebuildAnalyzer.Helper;
 using System.Collections.Concurrent;

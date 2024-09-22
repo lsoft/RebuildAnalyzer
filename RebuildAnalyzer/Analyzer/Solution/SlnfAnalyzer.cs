@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using RebuildAnalyzer.Analyzer.Request;
+using RebuildAnalyzer.Analyzer.Result;
 using RebuildAnalyzer.Analyzer.Solution.Project.Factory;
 using RebuildAnalyzer.FileStructure;
 

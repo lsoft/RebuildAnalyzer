@@ -1,4 +1,5 @@
 using RebuildAnalyzer.Analyzer;
+using RebuildAnalyzer.Analyzer.Request;
 using RebuildAnalyzer.ConsoleApp;
 
 namespace RebuildAnalyzer.Tests
