@@ -152,10 +152,10 @@ namespace RebuildAnalyzer.Analyzer
                         if (affectedSubjectPart is not null)
                         {
                             return
-                                    new SubjectAnalyzeResult(
-                                    subject,
-                                    affectedSubjectPart
-                                    );
+                                new SubjectAnalyzeResult(
+                                subject,
+                                affectedSubjectPart
+                                );
                         }
                         else if (everythingChanged)
                         {
@@ -164,9 +164,11 @@ namespace RebuildAnalyzer.Analyzer
                         }
                     }
                     break;
+                default:
+                    throw new InvalidOperationException($"{subject.Kind} is unknown kind of subject.");
             }
 
-            throw new InvalidOperationException($"{subject.Kind} is unknown kind of subject.");
+            return null;
         }
     }
 }

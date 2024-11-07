@@ -6,13 +6,11 @@ namespace RebuildAnalyzer.MsBuild
     public sealed class EvaluationProjectWrapper : IDisposable
     {
         public Project Project { get; }
-        private readonly ProjectCollection _projectCollection;
 
         private int _disposed = 0;
 
         public EvaluationProjectWrapper(
-            Microsoft.Build.Evaluation.Project project,
-            Microsoft.Build.Evaluation.ProjectCollection projectCollection
+            Microsoft.Build.Evaluation.Project project
             )
         {
             if (project is null)
@@ -21,7 +19,6 @@ namespace RebuildAnalyzer.MsBuild
             }
 
             Project = project;
-            this._projectCollection = projectCollection;
         }
 
         public ICollection<string> ScanForProjectFiles(
@@ -212,7 +209,7 @@ namespace RebuildAnalyzer.MsBuild
                 return;
             }
 
-            _projectCollection.UnloadProject(Project);
+            Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.UnloadProject(Project);
         }
     }
 }

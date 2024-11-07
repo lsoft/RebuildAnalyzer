@@ -5,6 +5,7 @@ using RebuildAnalyzer.Analyzer.Request;
 using RebuildAnalyzer.Analyzer.Result;
 using RebuildAnalyzer.Helper;
 using RebuildAnalyzer.MsBuild;
+using System.Diagnostics;
 
 namespace RebuildAnalyzer.Analyzer.Solution.Project
 {
@@ -60,12 +61,9 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                 CsprojFullFilePath
                 );
 
-            using var preEvaluatedProject = EvaluateProject(
+            var (configurations, targetFrameworks) = DetermineConfigurationAndTargetFramework(
                 projectXmlRoot
                 );
-
-            var configurations = preEvaluatedProject.DetermineConfigurations();
-            var targetFrameworks = preEvaluatedProject.DetermineTargetFrameworks();
 
             _projectFiles = new HashSet<string>();
             foreach (var configuration in configurations)
@@ -76,6 +74,8 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                     gp["Configuration"] = configuration;
                     gp["TargetFramework"] = targetFramework;
 
+                    //var sw = Stopwatch.StartNew();
+                    //var ev2 = sw.Elapsed;
                     using var evaluatedProject = EvaluateProject(
                         projectXmlRoot,
                         new Microsoft.Build.Definition.ProjectOptions
@@ -84,6 +84,8 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                             EvaluationContext = _evaluationContext
                         }
                         );
+                    //var ev3 = sw.Elapsed;
+                    //Console.WriteLine("--2> " + (ev3 - ev2) + "          " + configuration + ", " + targetFramework);
 
                     if (request.AdditionalProjectAnalyzer is not null)
                     {
@@ -100,10 +102,7 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                     _projectFiles.AddRange(projectFiles);
                 }
             }
-
-
         }
-
 
         public AffectedSubjectPart? IsAffected(
             AnalyzeRequest request
@@ -150,6 +149,24 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                 );
         }
 
+        private (IReadOnlyList<string> configurations, IReadOnlyList<string> targetFrameworks) DetermineConfigurationAndTargetFramework(
+            Microsoft.Build.Construction.ProjectRootElement projectXmlRoot
+            )
+        {
+            //var sw = Stopwatch.StartNew();
+
+            using var preEvaluatedProject = EvaluateProject(
+                projectXmlRoot
+                );
+
+            //var ev1 = sw.Elapsed;
+            //Console.WriteLine("--1> " + ev1);
+
+            var configurations = preEvaluatedProject.DetermineConfigurations();
+            var targetFrameworks = preEvaluatedProject.DetermineTargetFrameworks();
+            return (configurations, targetFrameworks);
+        }
+
         private EvaluationProjectWrapper EvaluateProject(
             Microsoft.Build.Construction.ProjectRootElement projectXmlRoot,
             ProjectOptions? projectOptions = null
@@ -160,17 +177,13 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                 EvaluationContext = _evaluationContext
             };
 
-            var projectCollection = new Microsoft.Build.Evaluation.ProjectCollection();
-            workingProjectOptions.ProjectCollection = projectCollection;
-
             var evaluatedProject = Microsoft.Build.Evaluation.Project.FromProjectRootElement(
                 projectXmlRoot,
                 workingProjectOptions
                 );
 
             return new EvaluationProjectWrapper(
-                evaluatedProject,
-                projectCollection
+                evaluatedProject
                 );
         }
 
