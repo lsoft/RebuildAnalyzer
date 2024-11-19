@@ -1,11 +1,8 @@
-﻿using Microsoft.Build.Definition;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Evaluation.Context;
+﻿using Microsoft.Build.Evaluation.Context;
 using RebuildAnalyzer.Analyzer.Request;
 using RebuildAnalyzer.Analyzer.Result;
 using RebuildAnalyzer.Helper;
 using RebuildAnalyzer.MsBuild;
-using System.Diagnostics;
 
 namespace RebuildAnalyzer.Analyzer.Solution.Project
 {
@@ -57,36 +54,13 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
             AnalyzeRequest request
             )
         {
-            var projectXmlRoot = Microsoft.Build.Construction.ProjectRootElement.Open(
-                CsprojFullFilePath
-                );
-
-            var (configurations, targetFrameworks) = DetermineConfigurationAndTargetFramework(
-                projectXmlRoot
-                );
-
             _projectFiles = new HashSet<string>();
-            foreach (var configuration in configurations)
-            {
-                foreach (var targetFramework in targetFrameworks)
+
+            var evaluator = new ProjectReferenceProvider(
+                _evaluationContext,
+                null,
+                evaluatedProject =>
                 {
-                    var gp = new Dictionary<string, string>();
-                    gp["Configuration"] = configuration;
-                    gp["TargetFramework"] = targetFramework;
-
-                    //var sw = Stopwatch.StartNew();
-                    //var ev2 = sw.Elapsed;
-                    using var evaluatedProject = EvaluateProject(
-                        projectXmlRoot,
-                        new Microsoft.Build.Definition.ProjectOptions
-                        {
-                            GlobalProperties = gp,
-                            EvaluationContext = _evaluationContext
-                        }
-                        );
-                    //var ev3 = sw.Elapsed;
-                    //Console.WriteLine("--2> " + (ev3 - ev2) + "          " + configuration + ", " + targetFramework);
-
                     if (request.AdditionalProjectAnalyzer is not null)
                     {
                         _additionalAnalyzerResults = request.AdditionalProjectAnalyzer(
@@ -101,7 +75,15 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                         );
                     _projectFiles.AddRange(projectFiles);
                 }
-            }
+                );
+
+            var projectXmlRoot = Microsoft.Build.Construction.ProjectRootElement.Open(
+                CsprojFullFilePath
+                );
+
+            evaluator.EnumerateProjectReferences(
+                projectXmlRoot
+                );
         }
 
         public AffectedSubjectPart? IsAffected(
@@ -148,44 +130,5 @@ namespace RebuildAnalyzer.Analyzer.Solution.Project
                 _additionalAnalyzerResults
                 );
         }
-
-        private (IReadOnlyList<string> configurations, IReadOnlyList<string> targetFrameworks) DetermineConfigurationAndTargetFramework(
-            Microsoft.Build.Construction.ProjectRootElement projectXmlRoot
-            )
-        {
-            //var sw = Stopwatch.StartNew();
-
-            using var preEvaluatedProject = EvaluateProject(
-                projectXmlRoot
-                );
-
-            //var ev1 = sw.Elapsed;
-            //Console.WriteLine("--1> " + ev1);
-
-            var configurations = preEvaluatedProject.DetermineConfigurations();
-            var targetFrameworks = preEvaluatedProject.DetermineTargetFrameworks();
-            return (configurations, targetFrameworks);
-        }
-
-        private EvaluationProjectWrapper EvaluateProject(
-            Microsoft.Build.Construction.ProjectRootElement projectXmlRoot,
-            ProjectOptions? projectOptions = null
-            )
-        {
-            var workingProjectOptions = projectOptions ?? new Microsoft.Build.Definition.ProjectOptions
-            {
-                EvaluationContext = _evaluationContext
-            };
-
-            var evaluatedProject = Microsoft.Build.Evaluation.Project.FromProjectRootElement(
-                projectXmlRoot,
-                workingProjectOptions
-                );
-
-            return new EvaluationProjectWrapper(
-                evaluatedProject
-                );
-        }
-
     }
 }

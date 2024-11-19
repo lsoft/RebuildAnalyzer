@@ -1,24 +1,49 @@
-﻿using Microsoft.Build.Evaluation;
+﻿using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation;
 using RebuildAnalyzer.Helper;
 
 namespace RebuildAnalyzer.MsBuild
 {
     public sealed class EvaluationProjectWrapper : IDisposable
     {
+        private readonly ProjectCollection _projectCollection;
+
         public Project Project { get; }
 
         private int _disposed = 0;
 
         public EvaluationProjectWrapper(
-            Microsoft.Build.Evaluation.Project project
+            Microsoft.Build.Construction.ProjectRootElement projectXmlRoot,
+            ProjectOptions projectOptions
             )
         {
-            if (project is null)
+            if (projectXmlRoot is null)
             {
-                throw new ArgumentNullException(nameof(project));
+                throw new ArgumentNullException(nameof(projectXmlRoot));
             }
 
-            Project = project;
+            if (projectOptions is null)
+            {
+                throw new ArgumentNullException(nameof(projectOptions));
+            }
+
+            Project = Microsoft.Build.Evaluation.Project.FromProjectRootElement(
+                projectXmlRoot,
+                projectOptions
+                );
+            
+            _projectCollection = projectOptions.ProjectCollection ?? Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection;
+        }
+
+        public ICollection<string> ScanForProjectReferences(
+            string rootFolder,
+            string csprojFullFolderPath
+            )
+        {
+            return Project.AllEvaluatedItems
+                .Where(p => p.ItemType == "ProjectReference")
+                .Select(p => p.EvaluatedInclude)
+                .ToList();
         }
 
         public ICollection<string> ScanForProjectFiles(
@@ -209,7 +234,7 @@ namespace RebuildAnalyzer.MsBuild
                 return;
             }
 
-            Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.UnloadProject(Project);
+            _projectCollection.UnloadProject(Project);
         }
     }
 }

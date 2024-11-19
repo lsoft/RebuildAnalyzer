@@ -8,6 +8,16 @@ namespace RebuildAnalyzer.Helper
 {
     public static class PathHelper
     {
+        public static string MakeRelativeAgainst(
+            this string filePath,
+            string referencePath
+            )
+        {
+            var fileUri = new Uri(filePath);
+            var referenceUri = new Uri(referencePath);
+            return Uri.UnescapeDataString(referenceUri.MakeRelativeUri(fileUri).ToString()).Replace('/', Path.DirectorySeparatorChar);
+        }
+
         public static string GetFullPath(
             string rootPath,
             string somePath
